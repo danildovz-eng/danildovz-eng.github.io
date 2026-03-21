@@ -6,7 +6,6 @@
     <title>D-Bank</title>
     
     <meta name="monetag" content="631dd895c2b8c7468a8f43d408b71cdb">
-    <meta name="monetag" content="631dd895c2b8c7468a8f43d408b71cdb">
     <script>(function(s){s.dataset.zone='10759500',s.src='https://izcle.com/vignette.min.js'})([document.documentElement, document.body].filter(Boolean).pop().appendChild(document.createElement('script')))</script>
     
     <link rel="manifest" href="manifest.json">
@@ -548,7 +547,7 @@
             <div id="deposit-timer-area" style="margin-top:15px; display:none;"></div>
         </div>
 
-        <div style="background:var(--bg-surface); padding:20px; border-radius:12px; margin-bottom:15px; border:1px solid var(--border);">
+        <div style="background:var(--bg-surface); padding:20px; border-radius:12px; border:1px solid var(--border);">
             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
                 <div style="display:flex; align-items:center; gap:12px;"><div style="font-size:24px;">💳</div><div style="font-weight:600; font-size:15px;">Кредит наличными</div></div>
                 <div style="font-size:12px; font-weight:600;" id="credit-rate-label">Ставка: --%</div>
@@ -782,13 +781,15 @@
         document.getElementById('ad-modal').classList.add('active');
     };
 
-window.watchAd = function() {
+    window.watchAd = function() {
         const btnWatch = document.getElementById('btn-watch-ad');
         btnWatch.disabled = true;
-        btnWatch.innerText = "Реклама загружается...";
+        btnWatch.innerText = "Открываем рекламу...";
         
-        // Виньетка Monetag сработает автоматически от самого факта клика мышкой/пальцем.
-        // Мы запускаем таймер на 10 секунд, чтобы игрок успел закрыть баннер.
+        // Надежный способ для кнопки: открываем прямую ссылку
+        window.open('https://omg10.com/4/10759306', '_blank');
+        
+        // Ждем 10 секунд и начисляем награду игроку
         setTimeout(() => {
             const user = getState();
             if(!user) return;
@@ -819,7 +820,7 @@ window.watchAd = function() {
             }
             
             document.getElementById('ad-modal').classList.remove('active');
-        }, 10000); // 10 000 миллисекунд = 10 секунд
+        }, 10000); 
     };
 
 
