@@ -784,10 +784,10 @@
     window.watchAd = function() {
         const btnWatch = document.getElementById('btn-watch-ad');
         btnWatch.disabled = true;
-        btnWatch.innerText = "Открываем рекламу...";
+        btnWatch.innerText = "Ожидание...";
         
-        // Надежный способ для кнопки: открываем прямую ссылку
-        window.open('https://omg10.com/4/10759306', '_blank');
+        // Мы убрали принудительное открытие сайта.
+        // Теперь при клике по экрану Monetag сам решит, показать ли Виньетку (баннер).
         
         // Ждем 10 секунд и начисляем награду игроку
         setTimeout(() => {
@@ -820,7 +820,7 @@
             }
             
             document.getElementById('ad-modal').classList.remove('active');
-        }, 10000); 
+        }, 10000); // Таймер на 10 секунд
     };
 
 
