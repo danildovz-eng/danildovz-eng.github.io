@@ -780,13 +780,15 @@
         document.getElementById('ad-modal').classList.add('active');
     };
 
-    window.watchAd = function() {
+window.watchAd = function() {
         const btnWatch = document.getElementById('btn-watch-ad');
         btnWatch.disabled = true;
-        btnWatch.innerText = "Смотрим ролик...";
+        btnWatch.innerText = "Открываем рекламу...";
         
-        // Симуляция просмотра рекламы (3 секунды)
-        // В будущем сюда вставляется вызов функции показа от рекламной сети
+        // Открываем рекламную ссылку Monetag в новой вкладке
+        window.open('https://omg10.com/4/10759306', '_blank');
+        
+        // Ждем 3 секунды и начисляем награду игроку
         setTimeout(() => {
             const user = getState();
             if(!user) return;
