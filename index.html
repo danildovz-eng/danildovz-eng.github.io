@@ -135,10 +135,10 @@
         .toggle-row:first-child { border-top: none; padding-top: 0; }
         .switch { position: relative; display: inline-block; width: 40px; height: 22px; }
         .switch input { opacity: 0; width: 0; height: 0; }
-        .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background: var(--bg-main); border: 1px solid var(--border); border-radius: 24px; transition: .3s; }
-        .slider:before { position: absolute; content: ""; height: 14px; width: 14px; left: 3px; bottom: 3px; background: var(--text-muted); border-radius: 50%; transition: .3s; }
-        input:checked + .slider { background: var(--primary); border-color: var(--primary); }
-        input:checked + .slider:before { transform: translateX(18px); background: #fff; }
+        .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: var(--bg-main); border: 1px solid var(--border); border-radius: 24px; transition: .3s; }
+        .slider:before { position: absolute; content: ""; height: 14px; width: 14px; left: 3px; bottom: 3px; background-color: var(--text-muted); border-radius: 50%; transition: .3s; }
+        input:checked + .slider { background-color: var(--primary); border-color: var(--primary); }
+        input:checked + .slider:before { transform: translateX(18px); background-color: #fff; }
         
         .stock-item { display: flex; justify-content: space-between; align-items: center; background: var(--bg-surface); padding: 12px 15px; border-radius: 12px; margin-bottom: 8px; cursor: pointer; border: 1px solid transparent; transition: 0.2s; }
         .stock-item:active { border-color: var(--border); }
@@ -187,18 +187,6 @@
         .nav-icon { font-size: 18px; }
 
         .rps-room-item { background: var(--bg-surface); padding: 12px; border-radius: 12px; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center; border: 1px solid var(--border); }
-        
-        /* Стили новых мини-игр */
-        .safe-bar { width: 100%; height: 36px; background: var(--bg-surface); border-radius: 18px; position: relative; overflow: hidden; border: 1px solid var(--border); margin: 20px 0; }
-        .safe-target { position: absolute; height: 100%; background: rgba(35, 134, 54, 0.4); border-left: 2px solid var(--success); border-right: 2px solid var(--success); top: 0; }
-        .safe-cursor { position: absolute; width: 4px; height: 100%; background: #fff; top: 0; left: 0; box-shadow: 0 0 8px #fff; }
-        
-        .intercept-area { width: 100%; height: 280px; background: var(--bg-main); border-radius: 12px; position: relative; overflow: hidden; border: 1px solid var(--border); margin: 15px 0; }
-        .intercept-item { position: absolute; font-size: 32px; user-select: none; cursor: crosshair; }
-        
-        .dec-grid { display:grid; grid-template-columns:1fr 1fr; gap:15px; max-width:200px; margin:0 auto 20px; }
-        .dec-btn { background: var(--bg-surface); color: var(--text-dark); border: 2px solid var(--border); border-radius: 12px; height: 80px; display: flex; justify-content: center; align-items: center; font-size: 24px; cursor: pointer; transition: 0.1s; }
-        .dec-btn.active { background: var(--primary); border-color: #fff; box-shadow: 0 0 15px var(--primary); color: #fff; }
     </style>
 </head>
 <body ontouchstart="">
@@ -209,16 +197,16 @@
     <div id="push-notif" class="push-notif">
         <div class="push-icon" id="push-icon">✉️</div>
         <div>
-            <div style="font-weight: 600; font-size: 14px;" id="push-title">Уведомление</div>
+            <div style="font-weight: 600; font-size: 14px;" id="push-title">Входящее уведомление</div>
             <div style="font-size: 12px; color: var(--text-muted);" id="push-desc">Текст</div>
         </div>
     </div>
 
-    <div class="modal-overlay" id="history-menu-modal" onclick="if(event.target.id==='history-menu-modal') closeModal(null, 'history-menu-modal')">
+    <div class="modal-overlay" id="history-menu-modal" onclick="if(event.target.id==='history-menu-modal') document.getElementById('history-menu-modal').classList.remove('active')">
         <div class="modal-content" style="text-align:center;">
             <h3 style="margin-bottom:15px; font-size:16px;">Действие с операцией</h3>
             <div id="history-menu-actions" style="display:flex; flex-direction:column; gap:10px;"></div>
-            <button class="btn-main" style="margin-top:10px;" onclick="closeModal(null, 'history-menu-modal')">Закрыть</button>
+            <button class="btn-main" style="margin-top:10px;" onclick="document.getElementById('history-menu-modal').classList.remove('active')">Закрыть</button>
         </div>
     </div>
 
@@ -246,7 +234,7 @@
                 <button class="num-btn" onclick="enterPin('7')">7</button><button class="num-btn" onclick="enterPin('8')">8</button><button class="num-btn" onclick="enterPin('9')">9</button>
                 <div></div><button class="num-btn" onclick="enterPin('0')">0</button><button class="num-btn" onclick="deletePin()" style="border:none; color:var(--danger); font-size:24px;">⌫</button>
             </div>
-            <div style="margin-top:40px; color:var(--text-muted); cursor:pointer; font-size:13px; font-weight:500;" onclick="logout()">Сменить профиль</div>
+            <div style="margin-top:40px; color:var(--text-muted); cursor:pointer; font-size:13px; font-weight:500;" onclick="logout()">Сменить аккаунт</div>
         </div>
     </div>
 
@@ -313,10 +301,11 @@
         <div class="quick-actions">
             <button type="button" class="action-btn" onclick="openTransfer()"><div class="action-icon">💸</div><div class="action-text">Перевод</div></button>
             <button type="button" class="action-btn" onclick="openModal('topup-modal')"><div class="action-icon">📥</div><div class="action-text">Терминал</div></button>
-            <button type="button" class="action-btn" onclick="openModal('criminal-modal')"><div class="action-icon" style="color:var(--danger); border-color:rgba(218,54,51,0.3);">🔪</div><div class="action-text">Криминал</div></button>
+            <button type="button" class="action-btn" onclick="openHackMiniGame()"><div class="action-icon">💻</div><div class="action-text">Взлом</div></button>
             <button type="button" class="action-btn" onclick="openClansScreen()"><div class="action-icon">🛡️</div><div class="action-text">Клан</div></button>
             <button type="button" class="action-btn" onclick="openRpsLobby()"><div class="action-icon">✌️</div><div class="action-text">КНБ</div></button>
-            <button type="button" class="action-btn" onclick="openModal('casino-modal')"><div class="action-icon">🎰</div><div class="action-text">Казино</div></button>
+            <button type="button" class="action-btn" onclick="openModal('casino-modal')"><div class="action-icon" style="color:var(--danger); border-color:rgba(218,54,51,0.3);">🎰</div><div class="action-text">Казино</div></button>
+            <button type="button" class="action-btn" onclick="openModal('darknet-modal')"><div class="action-icon">🏴‍☠️</div><div class="action-text">Даркнет</div></button>
         </div>
 
         <div style="background:var(--bg-surface); padding:15px; border-radius:12px; margin-bottom:20px; border:1px solid var(--border);">
@@ -326,111 +315,6 @@
 
         <div style="font-size: 14px; font-weight: 600; margin-bottom: 12px; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.5px;">Последние операции</div>
         <div id="history-container"></div>
-    </div>
-
-    <div class="modal-overlay" id="criminal-modal" onclick="if(event.target.id==='criminal-modal') closeModal(null, 'criminal-modal')">
-        <div class="modal-content">
-            <div class="close-modal" onclick="closeModal(null, 'criminal-modal')">✕</div>
-            <h3 style="margin-bottom:15px; font-size:18px;">Теневые схемы 🕶️</h3>
-            <p style="font-size:12px; color:var(--text-muted); margin-bottom:15px;">Высокий риск — высокая прибыль.</p>
-            
-            <div style="display:flex; flex-direction:column; gap:10px;">
-                <div style="background:var(--bg-main); padding:12px; border-radius:8px; border:1px solid var(--border); display:flex; justify-content:space-between; align-items:center;">
-                    <div><b style="font-size:14px;">Взлом системы</b><br><span style="font-size:11px; color:var(--text-muted);">15⚡ | На реакцию</span></div>
-                    <div style="display:flex; gap:5px;">
-                        <button class="btn-main" style="width:30px; padding:0; background:var(--bg-surface); border:1px solid var(--border);" onclick="showGameRules('hack')">i</button>
-                        <button class="btn-main btn-primary" style="width:auto; padding:8px 12px; font-size:12px;" onclick="closeModal(null, 'criminal-modal'); openHackMiniGame();">Начать</button>
-                    </div>
-                </div>
-                
-                <div style="background:var(--bg-main); padding:12px; border-radius:8px; border:1px solid var(--border); display:flex; justify-content:space-between; align-items:center;">
-                    <div><b style="font-size:14px;">Даркнет (DDoS)</b><br><span style="font-size:11px; color:var(--text-muted);">20⚡ 50k$ | Удача</span></div>
-                    <div style="display:flex; gap:5px;">
-                        <button class="btn-main" style="width:30px; padding:0; background:var(--bg-surface); border:1px solid var(--border);" onclick="showGameRules('ddos')">i</button>
-                        <button class="btn-main btn-primary" style="width:auto; padding:8px 12px; font-size:12px;" onclick="closeModal(null, 'criminal-modal'); openModal('darknet-modal');">Начать</button>
-                    </div>
-                </div>
-
-                <div style="background:var(--bg-main); padding:12px; border-radius:8px; border:1px solid var(--border); display:flex; justify-content:space-between; align-items:center;">
-                    <div><b style="font-size:14px;">Медвежатник</b><br><span style="font-size:11px; color:var(--text-muted);">10⚡ | На ловкость</span></div>
-                    <div style="display:flex; gap:5px;">
-                        <button class="btn-main" style="width:30px; padding:0; background:var(--bg-surface); border:1px solid var(--border);" onclick="showGameRules('safe')">i</button>
-                        <button class="btn-main btn-primary" style="width:auto; padding:8px 12px; font-size:12px;" onclick="closeModal(null, 'criminal-modal'); openSafecracker();">Начать</button>
-                    </div>
-                </div>
-
-                <div style="background:var(--bg-main); padding:12px; border-radius:8px; border:1px solid var(--border); display:flex; justify-content:space-between; align-items:center;">
-                    <div><b style="font-size:14px;">Перехват данных</b><br><span style="font-size:11px; color:var(--text-muted);">15⚡ | На скорость</span></div>
-                    <div style="display:flex; gap:5px;">
-                        <button class="btn-main" style="width:30px; padding:0; background:var(--bg-surface); border:1px solid var(--border);" onclick="showGameRules('intercept')">i</button>
-                        <button class="btn-main btn-primary" style="width:auto; padding:8px 12px; font-size:12px;" onclick="closeModal(null, 'criminal-modal'); openIntercept();">Начать</button>
-                    </div>
-                </div>
-
-                <div style="background:var(--bg-main); padding:12px; border-radius:8px; border:1px solid var(--border); display:flex; justify-content:space-between; align-items:center;">
-                    <div><b style="font-size:14px;">Дешифратор</b><br><span style="font-size:11px; color:var(--text-muted);">20⚡ | На память</span></div>
-                    <div style="display:flex; gap:5px;">
-                        <button class="btn-main" style="width:30px; padding:0; background:var(--bg-surface); border:1px solid var(--border);" onclick="showGameRules('decoder')">i</button>
-                        <button class="btn-main btn-primary" style="width:auto; padding:8px 12px; font-size:12px;" onclick="closeModal(null, 'criminal-modal'); openDecoder();">Начать</button>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <div class="modal-overlay" id="game-rules-modal" style="z-index: 105;" onclick="if(event.target.id==='game-rules-modal') closeModal(null, 'game-rules-modal')">
-        <div class="modal-content" style="text-align:center;">
-            <div class="close-modal" onclick="closeModal(null, 'game-rules-modal')">✕</div>
-            <h3 id="rules-title" style="margin-bottom:15px; font-size:18px;">Правила</h3>
-            <p id="rules-text" style="font-size:13px; color:var(--text-muted); line-height:1.5; margin-bottom:20px; text-align:left;"></p>
-            <button class="btn-main" onclick="closeModal(null, 'game-rules-modal')">Понятно</button>
-        </div>
-    </div>
-
-    <div class="modal-overlay" id="safecracker-modal">
-        <div class="modal-content" style="text-align:center;">
-            <h3 style="margin-bottom:10px;">Медвежатник 🔓</h3>
-            <div id="safe-stage-display" style="font-size:14px; font-weight:600; color:var(--warning); margin-bottom:10px;">Этап: 1/3</div>
-            <p style="font-size:12px; color:var(--text-muted);">Остановите ползунок в зеленой зоне.</p>
-            
-            <div class="safe-bar">
-                <div class="safe-target" id="safe-target"></div>
-                <div class="safe-cursor" id="safe-cursor"></div>
-            </div>
-            
-            <button class="btn-main btn-primary" style="margin-top:20px; height:60px; font-size:18px;" onclick="stopSafe()">ОСТАНОВИТЬ</button>
-        </div>
-    </div>
-
-    <div class="modal-overlay" id="intercept-modal">
-        <div class="modal-content" style="text-align:center; padding:15px;">
-            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
-                <div style="font-weight:600; font-size:16px;">Сбор: <span id="intercept-score" style="color:var(--success);">0 $</span></div>
-                <div style="font-weight:600; font-size:16px;">⏳ <span id="intercept-time">20</span></div>
-            </div>
-            <p style="font-size:11px; color:var(--text-muted);">Ловите 💵 и 💎. Избегайте 🚓!</p>
-            
-            <div class="intercept-area" id="intercept-area"></div>
-            
-            <button class="btn-main btn-danger" style="margin-top:10px;" onclick="endIntercept(false, true)">Сбросить соединение (Отмена)</button>
-        </div>
-    </div>
-
-    <div class="modal-overlay" id="decoder-modal">
-        <div class="modal-content" style="text-align:center;">
-            <h3 style="margin-bottom:10px;">Дешифратор 🔢</h3>
-            <div id="dec-round" style="font-size:14px; font-weight:600; color:var(--primary); margin-bottom:5px;">Раунд: 1/5</div>
-            <p id="dec-status" style="font-size:12px; color:var(--text-muted); margin-bottom:20px; height:15px;">Приготовьтесь...</p>
-            
-            <div class="dec-grid">
-                <div class="dec-btn" id="dec-btn-0" onclick="decClick(0)">A</div>
-                <div class="dec-btn" id="dec-btn-1" onclick="decClick(1)">B</div>
-                <div class="dec-btn" id="dec-btn-2" onclick="decClick(2)">C</div>
-                <div class="dec-btn" id="dec-btn-3" onclick="decClick(3)">D</div>
-            </div>
-            
-            <button class="btn-main btn-danger" style="margin-top:10px;" onclick="closeModal(null, 'decoder-modal')">Прервать взлом</button>
-        </div>
     </div>
 
     <div class="modal-overlay" id="rps-modal" onclick="if(event.target.id==='rps-modal') closeRpsModal()">
@@ -651,7 +535,7 @@
             <div id="deposit-timer-area" style="margin-top:15px; display:none;"></div>
         </div>
 
-        <div style="background:var(--bg-surface); padding:20px; border-radius:12px; margin-bottom:15px; border:1px solid var(--border);">
+        <div style="background:var(--bg-surface); padding:20px; border-radius:12px; border:1px solid var(--border);">
             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
                 <div style="display:flex; align-items:center; gap:12px;"><div style="font-size:24px;">💳</div><div style="font-weight:600; font-size:15px;">Кредит наличными</div></div>
                 <div style="font-size:12px; font-weight:600;" id="credit-rate-label">Ставка: --%</div>
@@ -707,9 +591,9 @@
         </div>
     </div>
 
-    <div class="modal-overlay" id="skins-modal" onclick="if(event.target.id==='skins-modal') closeModal(null, 'skins-modal')">
+    <div class="modal-overlay" id="skins-modal" onclick="if(event.target.id==='skins-modal') closeModal(event, 'skins-modal')">
         <div class="modal-content" style="padding-top:15px;">
-            <div class="close-modal" onclick="closeModal(null, 'skins-modal')" id="skins-modal">✕</div>
+            <div class="close-modal" onclick="closeModal(event, 'skins-modal')" id="skins-modal">✕</div>
             <h3 style="margin-bottom:20px; text-align:center; font-size:18px;">Дизайн карты</h3>
             
             <div id="skin-preview-container" class="default" style="pointer-events:none; transform: scale(0.9); transform-origin: top center; margin-bottom:-10px; transition: 0.3s;">
@@ -725,9 +609,9 @@
         </div>
     </div>
 
-    <div class="modal-overlay" id="stock-modal" onclick="if(event.target.id==='stock-modal') closeModal(null, 'stock-modal')">
+    <div class="modal-overlay" id="stock-modal" onclick="if(event.target.id==='stock-modal') closeModal(event, 'stock-modal')">
         <div class="modal-content">
-            <div class="close-modal" onclick="closeModal(null, 'stock-modal')">✕</div>
+            <div class="close-modal" onclick="document.getElementById('stock-modal').classList.remove('active')">✕</div>
             <div id="modal-stock-icon" style="font-size: 32px; margin-bottom:10px; text-align:center;">📈</div>
             <h2 id="modal-stock-name" style="text-align:center; font-size:18px; margin-bottom:5px;">Актив</h2>
             <div style="text-align:center; font-size: 24px; font-weight: 700; margin-bottom:15px;" id="modal-stock-price">0.00 $</div>
@@ -755,9 +639,9 @@
         </div>
     </div>
 
-    <div class="modal-overlay" id="casino-modal" onclick="if(event.target.id==='casino-modal') closeModal(null, 'casino-modal')">
+    <div class="modal-overlay" id="casino-modal" onclick="if(event.target.id==='casino-modal') closeModal(event, 'casino-modal')">
         <div class="modal-content" style="text-align:center;">
-            <div class="close-modal" onclick="closeModal(null, 'casino-modal')">✕</div>
+            <div class="close-modal" onclick="document.getElementById('casino-modal').classList.remove('active')">✕</div>
             <h3 style="margin-bottom:10px; font-size:18px;">🎰 Рулетка</h3>
             <p style="font-size:12px; color:var(--text-muted); margin-bottom:20px;">Укажите ставку и выберите цвет</p>
             <div class="form-group"><input type="number" id="casino-bet" placeholder="Ставка ($)" style="text-align:center; font-size:20px; font-weight:600;"></div>
@@ -775,18 +659,18 @@
         </div>
     </div>
 
-    <div class="modal-overlay" id="darknet-modal" onclick="if(event.target.id==='darknet-modal') closeModal(null, 'darknet-modal')">
+    <div class="modal-overlay" id="darknet-modal" onclick="if(event.target.id==='darknet-modal') closeModal(event, 'darknet-modal')">
         <div class="modal-content" style="text-align:center; background:#0D1117; border:1px solid #238636; box-shadow:0 0 15px rgba(35,134,54,0.2);">
-            <div class="close-modal" onclick="closeModal(null, 'darknet-modal')" style="color:#238636;">✕</div>
-            <h3 style="color:#238636; margin-bottom:15px; font-size:18px;">🏴‍☠️ Теневой рынок (DDoS)</h3>
+            <div class="close-modal" onclick="document.getElementById('darknet-modal').classList.remove('active')" style="color:#238636;">✕</div>
+            <h3 style="color:#238636; margin-bottom:15px; font-size:18px;">🏴‍☠️ Теневой рынок</h3>
             <p style="font-size:12px; color:var(--text-muted); margin-bottom:25px; line-height:1.5;">Организация DDoS-атаки. В случае успеха приносит прибыль. При провале — штраф и розыск.<br><br><span style="color:#238636;">Успех: 10%</span><br>Стоимость: 50 000 $ (Требует 20⚡)</p>
             <button class="btn-main" style="background:transparent; border:1px solid #238636; color:#238636; font-weight:600;" onclick="buyDdos()">Инициировать атаку</button>
         </div>
     </div>
 
-    <div class="modal-overlay" id="upgrades-modal" onclick="if(event.target.id==='upgrades-modal') closeModal(null, 'upgrades-modal')">
+    <div class="modal-overlay" id="upgrades-modal" onclick="if(event.target.id==='upgrades-modal') closeModal(event, 'upgrades-modal')">
         <div class="modal-content">
-            <div class="close-modal" onclick="closeModal(null, 'upgrades-modal')">✕</div>
+            <div class="close-modal" onclick="document.getElementById('upgrades-modal').classList.remove('active')">✕</div>
             <h3 style="margin-bottom:10px; font-size:18px;">Улучшения 🚀</h3>
             <p style="font-size:12px; color:var(--text-muted); margin-bottom:20px;">Инвестиции в инструменты</p>
             
@@ -808,20 +692,19 @@
         </div>
     </div>
 
-    <div class="modal-overlay" id="topup-modal" onclick="if(event.target.id==='topup-modal') closeModal(null, 'topup-modal')">
+    <div class="modal-overlay" id="topup-modal" onclick="if(event.target.id==='topup-modal') closeModal(event, 'topup-modal')">
         <div class="modal-content" style="text-align:center;">
             <h3 style="font-size:18px; margin-bottom:10px;">Банкомат</h3>
             <p style="font-size: 12px; color: var(--text-muted); margin-bottom: 20px;">Доступно раз в 5 часов.</p>
             <button type="button" class="btn-main btn-primary" onclick="simulateTopUp()">Зачислить 100 $</button>
-            <button type="button" class="btn-main" style="margin-top:10px;" onclick="closeModal(null, 'topup-modal')">Отмена</button>
+            <button type="button" class="btn-main" style="margin-top:10px;" onclick="document.getElementById('topup-modal').classList.remove('active')">Отмена</button>
         </div>
     </div>
     
-    <div class="modal-overlay" id="hack-modal" onclick="if(event.target.id==='hack-modal') closeModal(null, 'hack-modal')">
+    <div class="modal-overlay" id="hack-modal">
         <div class="modal-content" style="text-align:center;">
-            <div class="close-modal" onclick="closeModal(null, 'hack-modal')">✕</div>
             <h3 style="font-size:18px; margin-bottom:15px;">Взлом системы 💻</h3>
-            <p style="font-size:12px; color:var(--text-muted); margin-bottom:20px; line-height:1.4;">Введите проверочный код за 5 секунд.<br>При ошибке: штраф 10%, блокировка и +2 звезды розыска.<br><b>Стоимость: 15⚡</b></p>
+            <p style="font-size:12px; color:var(--text-muted); margin-bottom:20px; line-height:1.4;">Введите проверочный код за 5 секунд.<br>При ошибке: штраф 10%, блокировка и розыск.<br><b>Стоимость: 15⚡</b></p>
             <div style="font-size:32px; font-weight:700; letter-spacing:6px; margin-bottom:10px; color:var(--primary);" id="hack-pin-display">000000</div>
             <div style="font-size:22px; color:var(--danger); margin-bottom:20px; font-weight:600;" id="hack-timer">5</div>
             <div class="form-group"><input type="number" id="hack-input" placeholder="Код подтверждения" style="text-align:center; font-size:20px; letter-spacing:4px; font-weight:600;"></div>
@@ -886,13 +769,8 @@
 
     // ГЛОБАЛЬНЫЕ ПЕРЕМЕННЫЕ
     let tempRegEmail = ""; let tempRegCode = ""; let currentMarketTab = 'stocks'; let currentStockId = null; let currentChartTab = '1H'; let activeNews = null; let deleteConfirm = false; let toastTimeout; let isPinVisible = false; let isFlipped = false; let touchstartX = 0; let currentPinInput = "";
-    let clanChatRef = null; let rpsListener = null; let rpsCurrentRoomId = null;
-
-    // ГЛОБАЛЬНЫЕ ПЕРЕМЕННЫЕ ИГР
-    let hackInterval; let currentHackPin = "";
-    let safeInterval; let safeStage = 1; let safePos = 0; let safeDir = 1; let safeSpeed = 2; let safeZoneStart = 40; let safeZoneWidth = 20;
-    let interceptInterval; let interceptTimeout; let interceptScore = 0;
-    let decSeq = []; let decStep = 0; let decRound = 1; let decPlaying = false;
+    let hackInterval; let currentHackPin = ""; let clanChatRef = null;
+    let rpsListener = null; let rpsCurrentRoomId = null;
 
     let currentUserKey = null;
     try { currentUserKey = localStorage.getItem('DBank_User_Key'); } catch(e) {}
@@ -1154,253 +1032,10 @@
 
     window.switchScreen = function(screenId) { document.querySelectorAll('.screen').forEach(s => s.classList.remove('active')); document.getElementById(screenId).classList.add('active'); }
     window.switchTab = function(screenId, navElement = null) { switchScreen(screenId); if(navElement) { document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active')); navElement.classList.add('active'); } }
-    
     window.openModal = function(id) { document.getElementById(id).classList.add('active'); }
-    window.closeModal = function(event, id) { 
-        if(event && event.target.id !== id) return;
-        document.getElementById(id).classList.remove('active'); 
-        
-        // Очистка таймеров игр при закрытии окон
-        if(typeof safeInterval !== 'undefined') clearInterval(safeInterval);
-        if(typeof interceptInterval !== 'undefined') clearInterval(interceptInterval);
-        if(typeof interceptTimeout !== 'undefined') clearInterval(interceptTimeout);
-        decPlaying = false;
-    }
+    window.closeModal = function(event, id) { if(event.target.id === id) document.getElementById(id).classList.remove('active'); }
 
-    // --- ПРАВИЛА ИГР ---
-    window.showGameRules = function(gameId) {
-        const titleEl = document.getElementById('rules-title');
-        const textEl = document.getElementById('rules-text');
-        
-        if(gameId === 'hack') {
-            titleEl.innerText = "Взлом системы 💻";
-            textEl.innerHTML = "<b>Стоимость:</b> 15⚡<br><b>Суть:</b> За 5 секунд введите проверочный код. <br><b>Награда:</b> от 500$ до 1200$<br><b>Штраф:</b> -10% от баланса, блокировка карты и +2 звезды розыска.";
-        } else if(gameId === 'ddos') {
-            titleEl.innerText = "Даркнет (DDoS) 🏴‍☠️";
-            textEl.innerHTML = "<b>Стоимость:</b> 20⚡ и 50 000$<br><b>Суть:</b> Запуск DDoS-атаки на сервера корпораций. Успех зависит от вашей удачи (шанс 10%).<br><b>Награда:</b> Огромный куш от 10 000$ до 100 000$<br><b>Штраф:</b> Потеря вложенных средств и +1 звезда розыска.";
-        } else if(gameId === 'safe') {
-            titleEl.innerText = "Медвежатник 🔓";
-            textEl.innerHTML = "<b>Стоимость:</b> 10⚡<br><b>Суть:</b> Ползунок быстро перемещается по шкале. Ваша задача — нажать кнопку ровно в тот момент, когда он находится в зеленой зоне. Пройдите 3 этапа. С каждым этапом скорость выше, а зона меньше.<br><b>Награда:</b> 1500$<br><b>Штраф:</b> +1 звезда розыска.";
-        } else if(gameId === 'intercept') {
-            titleEl.innerText = "Перехват данных 📡";
-            textEl.innerHTML = "<b>Стоимость:</b> 15⚡<br><b>Суть:</b> На экране в течение 20 секунд падают данные. Нажимайте на деньги 💵 (+50$) и крипту 💎 (+150$). <br>Категорически избегайте полицейских маячков 🚓!<br><b>Награда:</b> Вся собранная сумма.<br><b>Штраф:</b> При нажатии на 🚓 игра прерывается, вы получаете +1 звезду розыска.";
-        } else if(gameId === 'decoder') {
-            titleEl.innerText = "Дешифратор 🔢";
-            textEl.innerHTML = "<b>Стоимость:</b> 20⚡<br><b>Суть:</b> Игра на память. Система покажет последовательность кнопок. Вам нужно повторить её в точно таком же порядке. Пройдите 5 раундов. С каждым раундом комбинация удлиняется.<br><b>Награда:</b> 2500$<br><b>Штраф:</b> Потеря энергии при ошибке.";
-        }
-        document.getElementById('game-rules-modal').classList.add('active');
-    }
-
-    // --- ИГРА 1: МЕДВЕЖАТНИК ---
-    window.openSafecracker = function() {
-        const user = getState();
-        if(user.energy < 10) { showToast("Нужно 10⚡", "error"); return; }
-        user.energy -= 10; saveDB(); updateBalanceDisplayQuiet();
-        document.getElementById('safecracker-modal').classList.add('active');
-        startSafeStage(1);
-    }
-    function startSafeStage(stage) {
-        safeStage = stage;
-        safePos = 0; safeDir = 1;
-        document.getElementById('safe-stage-display').innerText = `Этап: ${stage}/3`;
-        
-        if(stage === 1) { safeSpeed = 2; safeZoneWidth = 30; safeZoneStart = 35; }
-        if(stage === 2) { safeSpeed = 4; safeZoneWidth = 20; safeZoneStart = Math.random() * 60 + 10; }
-        if(stage === 3) { safeSpeed = 6; safeZoneWidth = 10; safeZoneStart = Math.random() * 70 + 10; }
-
-        document.getElementById('safe-target').style.left = safeZoneStart + '%';
-        document.getElementById('safe-target').style.width = safeZoneWidth + '%';
-
-        clearInterval(safeInterval);
-        safeInterval = setInterval(() => {
-            safePos += safeSpeed * safeDir;
-            if(safePos >= 100) { safePos = 100; safeDir = -1; }
-            if(safePos <= 0) { safePos = 0; safeDir = 1; }
-            document.getElementById('safe-cursor').style.left = safePos + '%';
-        }, 20);
-    }
-    window.stopSafe = function() {
-        clearInterval(safeInterval);
-        if(safePos >= safeZoneStart && safePos <= safeZoneStart + safeZoneWidth) {
-            if(safeStage < 3) {
-                showToast("Отлично! Следующий пин.", "success");
-                setTimeout(() => startSafeStage(safeStage + 1), 800);
-            } else {
-                const user = getState();
-                user.balance += 1500;
-                saveDB(); updateBalanceDisplayQuiet();
-                addTransaction("Медвежатник", 1500, '💰');
-                showToast("Сейф вскрыт! +1500$", "success");
-                closeModal(null, 'safecracker-modal');
-            }
-        } else {
-            const user = getState();
-            user.wantedLevel = Math.min(5, (user.wantedLevel||0) + 1);
-            saveDB(); updateBalanceDisplayQuiet();
-            showPush("Тревога!", "Вы ошиблись! +1 звезда розыска", "🚨", true);
-            closeModal(null, 'safecracker-modal');
-        }
-    }
-
-    // --- ИГРА 2: ПЕРЕХВАТ ---
-    window.openIntercept = function() {
-        const user = getState();
-        if(user.energy < 15) { showToast("Нужно 15⚡", "error"); return; }
-        user.energy -= 15; saveDB(); updateBalanceDisplayQuiet();
-        interceptScore = 0;
-        document.getElementById('intercept-score').innerText = '0 $';
-        document.getElementById('intercept-modal').classList.add('active');
-        document.getElementById('intercept-area').innerHTML = '';
-
-        let time = 20;
-        document.getElementById('intercept-time').innerText = time;
-
-        interceptInterval = setInterval(() => {
-            spawnInterceptItem();
-        }, 500);
-
-        interceptTimeout = setInterval(() => {
-            time--;
-            document.getElementById('intercept-time').innerText = time;
-            if(time <= 0) {
-                endIntercept(true, false);
-            }
-        }, 1000);
-    }
-
-    function spawnInterceptItem() {
-        const area = document.getElementById('intercept-area');
-        const item = document.createElement('div');
-        item.className = 'intercept-item';
-        const rand = Math.random();
-        const isCop = rand < 0.25;
-        const isCrypto = rand > 0.85;
-        item.innerText = isCop ? '🚓' : (isCrypto ? '💎' : '💵');
-        item.dataset.type = isCop ? 'cop' : (isCrypto ? 'crypto' : 'money');
-
-        item.style.left = Math.random() * 80 + 5 + '%';
-        item.style.top = '-40px';
-        area.appendChild(item);
-
-        let pos = -40;
-        let speed = 2 + Math.random() * 3;
-        let fall = setInterval(() => {
-            pos += speed;
-            if(item) item.style.top = pos + 'px';
-            if(pos > 280) {
-                clearInterval(fall);
-                if(item && item.parentNode) item.parentNode.removeChild(item);
-            }
-        }, 20);
-
-        item.onclick = function() {
-            clearInterval(fall);
-            if(item.parentNode) item.parentNode.removeChild(item);
-            if(item.dataset.type === 'cop') {
-                endIntercept(false, false);
-            } else {
-                interceptScore += item.dataset.type === 'crypto' ? 150 : 50;
-                document.getElementById('intercept-score').innerText = interceptScore + ' $';
-            }
-        };
-    }
-
-    window.endIntercept = function(success, isCancel) {
-        clearInterval(interceptInterval);
-        clearInterval(interceptTimeout);
-        document.getElementById('intercept-area').innerHTML = '';
-
-        if(isCancel) {
-            closeModal(null, 'intercept-modal');
-            return;
-        }
-
-        const user = getState();
-        if(success) {
-            user.balance += interceptScore;
-            addTransaction("Перехват данных", interceptScore, '📡');
-            showToast(`Перехвачено ${interceptScore}$`, "success");
-        } else {
-            user.wantedLevel = Math.min(5, (user.wantedLevel||0) + 1);
-            showPush("Провал", "Вы нарвались на полицию! +1 звезда", "🚓", true);
-        }
-        saveDB(); updateBalanceDisplayQuiet();
-        closeModal(null, 'intercept-modal');
-    }
-
-    // --- ИГРА 3: ДЕШИФРАТОР ---
-    window.openDecoder = function() {
-        const user = getState();
-        if(user.energy < 20) { showToast("Нужно 20⚡", "error"); return; }
-        user.energy -= 20; saveDB(); updateBalanceDisplayQuiet();
-        decSeq = []; decRound = 1;
-        document.getElementById('decoder-modal').classList.add('active');
-        document.getElementById('dec-status').innerText = "Внимание!";
-        setTimeout(nextDecRound, 1000);
-    }
-
-    function nextDecRound() {
-        if(!document.getElementById('decoder-modal').classList.contains('active')) return;
-        decStep = 0;
-        document.getElementById('dec-round').innerText = `Раунд: ${decRound}/5`;
-        document.getElementById('dec-status').innerText = "Запоминайте...";
-        decSeq.push(Math.floor(Math.random() * 4));
-        playDecSequence();
-    }
-
-    function playDecSequence() {
-        decPlaying = true;
-        let i = 0;
-        let interval = setInterval(() => {
-            if(!document.getElementById('decoder-modal').classList.contains('active')) {
-                clearInterval(interval); return;
-            }
-            let btnId = 'dec-btn-' + decSeq[i];
-            let btn = document.getElementById(btnId);
-            btn.classList.add('active');
-            setTimeout(() => btn.classList.remove('active'), 400);
-            i++;
-            if(i >= decSeq.length) {
-                clearInterval(interval);
-                setTimeout(() => {
-                    decPlaying = false;
-                    document.getElementById('dec-status').innerText = "Ваш ход!";
-                }, 500);
-            }
-        }, 800);
-    }
-
-    window.decClick = function(num) {
-        if(decPlaying) return;
-        let btn = document.getElementById('dec-btn-' + num);
-        btn.classList.add('active');
-        setTimeout(() => btn.classList.remove('active'), 200);
-
-        if(num === decSeq[decStep]) {
-            decStep++;
-            if(decStep === decSeq.length) {
-                if(decRound === 5) {
-                    const user = getState();
-                    user.balance += 2500;
-                    saveDB(); updateBalanceDisplayQuiet();
-                    addTransaction("Дешифратор", 2500, '🔢');
-                    showToast("Взлом успешен! +2500$", "success");
-                    closeModal(null, 'decoder-modal');
-                } else {
-                    decRound++;
-                    decPlaying = true;
-                    document.getElementById('dec-status').innerText = "Отлично!";
-                    setTimeout(nextDecRound, 1000);
-                }
-            }
-        } else {
-            showToast("Ошибка дешифровки!", "error");
-            closeModal(null, 'decoder-modal');
-        }
-    }
-
-
-    // АДМИНКА И ПРОЧЕЕ (без изменений)
+    // АДМИНКА
     window.banUser = function(targetKey) { 
         if(currentUserKey !== 'danildovz1@gmail,com') return; 
         if(confirm("Заблокировать игрока?")) { database.ref('users/' + targetKey).update({ isBanned: true }).then(() => { showToast("Аккаунт заблокирован", "success"); openLeaderboard(); }); } 
@@ -1700,40 +1335,21 @@
             user.wantedLevel = Math.min(5, (user.wantedLevel||0) + 1);
             addTransaction("Провал операции", -50000, '🏴‍☠️'); showPush("Внимание", "Операция сорвана. Средства потеряны. Розыск повышен.", "🏴‍☠️", true); 
         }
-        saveDB(); updateBalanceDisplayQuiet(); document.getElementById('criminal-modal').classList.remove('active');
+        saveDB(); updateBalanceDisplayQuiet(); document.getElementById('darknet-modal').classList.remove('active');
     };
 
-    window.openHackMiniGame = function() { 
-        const user = getState(); if(user.isLocked) { showToast("Разблокируйте карту", "error"); return; } 
-        if(user.energy < 15) { showToast("Недостаточно энергии", "error"); return; } 
-        user.energy -= 15; saveDB(); updateBalanceDisplayQuiet(); 
-        document.getElementById('hack-modal').classList.add('active'); 
-        currentHackPin = generateRandomNum(6); 
-        document.getElementById('hack-pin-display').innerText = currentHackPin; 
-        document.getElementById('hack-input').value = ''; 
-        let timeLeft = 5; document.getElementById('hack-timer').innerText = timeLeft; 
-        clearInterval(hackInterval); 
-        hackInterval = setInterval(() => { timeLeft--; document.getElementById('hack-timer').innerText = timeLeft; if(timeLeft <= 0) { clearInterval(hackInterval); failHack(); } }, 1000); 
-    }
-    
-    window.submitHack = function() { 
-        if(document.getElementById('hack-input').value === currentHackPin) { 
-            clearInterval(hackInterval); document.getElementById('hack-modal').classList.remove('active'); 
-            let win = 500 + Math.floor(Math.random() * 701); const user = getState(); user.balance += win; 
-            progressQuest('hack'); saveDB(); addTransaction("Операция", win, '💻'); updateBalanceDisplayQuiet(); 
-            showPush("Успех", `Зачислено ${win} $`, "💻"); showSuccessEffect(); 
-        } else { failHack(); } 
-    }
-    
-    function failHack() { 
-        clearInterval(hackInterval); document.getElementById('hack-modal').classList.remove('active'); 
-        const user = getState(); user.isLocked = true; let penalty = Math.floor(user.balance * 0.1); 
-        user.balance -= penalty; user.wantedLevel = Math.min(5, (user.wantedLevel||0) + 2); 
-        saveDB(); applyLockStatusVisually(); updateBalanceDisplayQuiet(); addTransaction("Штраф", -penalty, '🚨'); 
-        showPush("Внимание", "Ошибка. Блокировка, списание 10% и +2 розыска.", "🚨", true); 
+    window.payBribe = function() {
+        const user = getState();
+        if(!user.wantedLevel) { showToast("У вас нет штрафов", "success"); return; }
+        let cost = user.wantedLevel * 50000;
+        if(user.balance < cost) { showToast(`Необходимо ${cost.toLocaleString()} $`, "error"); return; }
+        user.balance -= cost;
+        user.wantedLevel = 0;
+        saveDB(); updateBalanceDisplayQuiet(); renderUsefulFull();
+        addTransaction("Оплата штрафа", -cost, '👮');
+        showToast("Вопрос урегулирован", "success");
     }
 
-    // --- КЛАНЫ ---
     window.openClansScreen = function() { const user = getState(); switchTab('screen-clans', null); if (user.clanId) { document.getElementById('clan-no-clan').style.display = 'none'; document.getElementById('clan-active').style.display = 'block'; refreshClanData(); initClanChat(user.clanId); } else { document.getElementById('clan-no-clan').style.display = 'block'; document.getElementById('clan-active').style.display = 'none'; } }
     
     window.createClan = function() { const user = getState(); if(user.balance < 10000) { showToast("Недостаточно средств", "error"); return; } let cName = prompt("Введите название клана:"); if(!cName || cName.trim() === '') return; user.balance -= 10000; let newClanRef = database.ref('clans').push(); let clanData = { name: cName, ownerId: currentUserKey, members: {}, fund: 0, isCollecting: false }; clanData.members[currentUserKey] = user.name; newClanRef.set(clanData).then(() => { user.clanId = newClanRef.key; saveDB(); updateBalanceDisplayQuiet(); addTransaction("Создание клана", -10000, '🛡️'); showToast("Группа создана", "success"); openClansScreen(); }); }
@@ -1798,6 +1414,386 @@
     window.donateToClan = function() { const user = getState(); if(!user.clanId) return; let amt = parseFloat(document.getElementById('clan-donate-amount').value); if(!amt || amt <= 0 || amt > user.balance) { showToast("Недостаточно средств", "error"); return; } database.ref(`clans/${user.clanId}`).once('value').then(snap => { let clan = snap.val(); if(clan && clan.isCollecting) { database.ref(`clans/${user.clanId}/fund`).set((clan.fund || 0) + amt).then(() => { user.balance -= amt; saveDB(); updateBalanceDisplayQuiet(); addTransaction("Взнос в группу", -amt, '🛡️'); showToast("Средства переведены", "success"); document.getElementById('clan-donate-amount').value = ''; refreshClanData(); }); } else { showToast("Сбор закрыт", "error"); } }); }
 
     window.kickMember = function(cId, uid) { if(confirm("Подтвердите исключение пользователя")) { database.ref(`clans/${cId}/members/${uid}`).remove().then(() => { showToast("Пользователь исключен", "success"); refreshClanData(); }); } }
+
+    function checkQuests() { 
+        const user = getState(); const today = new Date().toLocaleDateString('ru-RU'); 
+        if(!user.quests || user.quests.date !== today || !user.quests.list) { 
+            let shuffled = [...questTemplates].sort(() => 0.5 - Math.random()).slice(0, 3);
+            let activeList = shuffled.map(q => ({id: q.id, icon: q.icon, desc: q.desc, target: q.target, progress: 0}));
+            user.quests = { date: today, list: activeList, done: false }; 
+        } 
+    }
+    
+    function renderQuests() {
+        const user = getState(); if(!user) return; checkQuests(); const q = user.quests; const container = document.getElementById('quest-container'); if(!container) return;
+        if(q.done) { container.innerHTML = '<div style="color:var(--success); font-weight:600; text-align:center;">Задания выполнены</div>'; return; }
+        let html = ''; let allDone = true;
+        q.list.forEach(item => {
+            let prog = Math.min(item.progress, item.target);
+            if(prog < item.target) allDone = false;
+            html += `<div style="font-size:13px; margin-bottom:8px; display:flex; justify-content:space-between;"><span>${item.icon} ${item.desc}</span> <span style="color:var(--text-muted);">${prog}/${item.target}</span></div>`;
+        });
+        if(allDone) { html += `<button class="btn-main btn-success" style="margin-top:10px;" onclick="claimQuests()">Получить награду (500 $)</button>`; }
+        container.innerHTML = html;
+    }
+
+    window.progressQuest = function(id) {
+        const user = getState();
+        if(!user || !user.quests || user.quests.done || !user.quests.list) return;
+        let qItem = user.quests.list.find(q => q.id === id);
+        if(qItem && qItem.progress < qItem.target) { qItem.progress++; saveDB(); renderQuests(); }
+    }
+
+    window.claimQuests = function() { 
+        const user = getState(); user.quests.done = true; let win = 500; user.balance += win; 
+        addTransaction("Награда за задания", win, '🎯'); 
+        saveDB(); updateBalanceDisplayQuiet(); renderQuests(); 
+        showPush("Уведомление", `Зачислено ${win} $`, "🎯"); 
+        showSuccessEffect();
+    }
+
+    window.buyCustomCard = function() {
+        const user = getState(); const input = document.getElementById('custom-card-input').value.replace(/\s/g, '');
+        if(input.length !== 16 || isNaN(input)) { showToast("Требуется 16 цифр", "error"); return; }
+        if(user.balance < 500000) { showToast("Недостаточно средств", "error"); return; }
+        database.ref('users').once('value').then(snap => {
+            let allUsers = snap.val() || {}; let taken = false; for(let key in allUsers) { if(allUsers[key].cardNumber === input) { taken = true; break; } }
+            if(taken) { showToast("Номер недоступен", "error"); return; }
+            user.balance -= 500000; user.cardNumber = input; saveDB(); updateBalanceDisplayQuiet(); addTransaction("Оформление номера", -500000, '💳'); showToast("Услуга активна", "success"); document.getElementById('custom-card-input').value = '';
+            const formatted = input.match(/.{1,4}/g).join(' '); document.getElementById('full-card-num').innerText = formatted; document.getElementById('dashboard-card-num').innerText = formatted;
+        });
+    }
+
+    window.openUseful = function(navElement) { if(getState().isLocked) { showToast("Разблокируйте карту", "error"); return; } switchTab('screen-useful', navElement); renderUsefulFull(); renderBusinesses(); }
+    
+    function renderUsefulFull() { 
+        const user = getState(); 
+        const depTimerArea = document.getElementById('deposit-timer-area'); const depInputArea = document.getElementById('deposit-input-area'); 
+        if(user.deposits && user.deposits.length > 0) { depTimerArea.style.display = 'block'; } else { depTimerArea.style.display = 'none'; } 
+        const credInputArea = document.getElementById('credit-input-area'); const credTimerArea = document.getElementById('credit-timer-area'); 
+        let cData = getCreditData(); 
+        document.getElementById('credit-score-display').innerText = cData.score; 
+        document.getElementById('credit-score-display').style.color = cData.score > 80 ? 'var(--success)' : cData.score < 40 ? 'var(--danger)' : 'var(--warning)'; 
+        document.getElementById('credit-rate-label').innerText = `Ставка: ${cData.rate}%`; 
+        
+        let minerCount = user.miners || 0;
+        let minerPrice = 100000 * Math.pow(1.2, minerCount);
+        document.getElementById('btn-buy-miner').innerText = `Купить (${minerPrice.toLocaleString('ru-RU', {maximumFractionDigits:0})} $)`;
+        document.getElementById('miner-count-display').innerText = `Оборудования: ${minerCount} шт.`;
+
+        if(user.hasOffshore) { document.getElementById('btn-offshore').innerText = "Услуга активна"; document.getElementById('btn-offshore').disabled = true; document.getElementById('btn-offshore').style.background = "var(--success)"; document.getElementById('btn-offshore').style.color = "#fff"; }
+
+        if(user.credit && user.credit.active) { credInputArea.style.display = 'none'; credTimerArea.style.display = 'block'; depInputArea.style.opacity = '0.5'; depInputArea.style.pointerEvents = 'none'; } 
+        else { document.getElementById('credit-desc-text').innerText = `Доступно ${cData.limit} $ на 5 минут. Возврат: ${cData.cReturn} $. Своевременное погашение повышает рейтинг.`; document.getElementById('btn-take-credit').innerText = `Оформить ${cData.limit} $`; credInputArea.style.display = 'block'; credTimerArea.style.display = 'none'; depInputArea.style.opacity = '1'; depInputArea.style.pointerEvents = 'auto'; } 
+        
+        let bribeCost = (user.wantedLevel || 0) * 50000;
+        if(user.wantedLevel > 0) {
+            document.getElementById('bribe-container').style.display = 'block';
+            document.getElementById('btn-bribe').innerText = `Оплатить ${bribeCost.toLocaleString('ru-RU')} $`;
+        } else {
+            document.getElementById('bribe-container').style.display = 'none';
+        }
+
+        renderUsefulTimersOnly(); 
+    }
+    
+    function renderUsefulTimersOnly() { 
+        const user = getState(); 
+        if(user.deposits && user.deposits.length > 0) { let html = ''; user.deposits.forEach(d => { let timeLeft = Math.max(0, Math.floor((d.endTime - Date.now()) / 1000)); let m = Math.floor(timeLeft / 60); let s = timeLeft % 60; html += `<div style="display:flex; justify-content:space-between; margin-bottom:10px; padding:12px; background:var(--bg-main); border:1px solid var(--border); border-radius:8px;"><div>Сумма: <b style="color:var(--text-dark);">${d.amount} $</b></div><div>Время: <b style="color:var(--primary);">${m}:${s < 10 ? '0'+s : s}</b></div></div>`; }); document.getElementById('deposit-timer-area').innerHTML = html; } 
+        if(user.credit && user.credit.active) { let timeLeft = Math.max(0, Math.floor((user.credit.dueTime - Date.now()) / 1000)); let m = Math.floor(timeLeft / 60); let s = timeLeft % 60; let cData = getCreditData(); document.getElementById('credit-timer-area').innerHTML = `<div style="display:flex; justify-content:space-between; margin-bottom:15px; padding:12px; background:rgba(218,54,51,0.1); border:1px solid var(--danger); border-radius:8px;"><div>Задолженность: <b style="color:var(--text-dark);">${cData.cReturn} $</b></div><div>Осталось: <b style="color:var(--danger);">${m}:${s < 10 ? '0'+s : s}</b></div></div><button class="btn-main btn-success" onclick="payCredit()">Внести платеж (${cData.cReturn} $)</button>`; } 
+        
+        if(user.smuggling && user.smuggling.active) {
+            let timeLeft = Math.max(0, Math.floor((user.smuggling.endTime - Date.now()) / 1000)); 
+            let m = Math.floor(timeLeft / 60); let s = timeLeft % 60; 
+            document.getElementById('smuggling-timer-area').innerHTML = `<div style="display:flex; justify-content:space-between; margin-bottom:10px; padding:12px; background:var(--bg-main); border:1px solid var(--border); border-radius:8px;"><div>Груз: <b style="color:var(--text-dark);">${user.smuggling.amount} $</b></div><div>В пути: <b style="color:var(--warning);">${m}:${s < 10 ? '0'+s : s}</b></div></div>`;
+            document.getElementById('smuggling-timer-area').style.display = 'block';
+            document.getElementById('smuggling-input-area').style.display = 'none';
+        } else {
+            document.getElementById('smuggling-timer-area').style.display = 'none';
+            document.getElementById('smuggling-input-area').style.display = 'block';
+        }
+    }
+
+    function renderBusinesses() {
+        const user = getState(); const area = document.getElementById('businesses-area'); if(!area) return; let html = "";
+        bizConfig.forEach(biz => {
+            let count = user.businesses && user.businesses[biz.id] ? user.businesses[biz.id] : 0;
+            let price = biz.basePrice * Math.pow(1.5, count); let inc = biz.baseIncome;
+            html += `<div style="display:flex; justify-content:space-between; align-items:center; background:var(--bg-main); border:1px solid var(--border); padding:12px; border-radius:8px;"><div><div style="font-size:14px;">${biz.icon} <b>${biz.name}</b> (Шт: ${count})</div><div style="font-size:12px; color:var(--text-muted); margin-top:4px;">Доход: +${inc} $ / сек</div></div><button class="btn-main" style="width:auto; padding:8px 12px; font-size:12px;" onclick="buyBusiness('${biz.id}')">${price.toLocaleString('ru-RU', {maximumFractionDigits:0})} $</button></div>`;
+        });
+        area.innerHTML = html;
+    }
+    
+    window.buyBusiness = function(type) {
+        const user = getState(); let bizDef = bizConfig.find(b => b.id === type); if(!bizDef) return;
+        let count = user.businesses && user.businesses[type] ? user.businesses[type] : 0;
+        let price = bizDef.basePrice * Math.pow(1.5, count); if(user.balance < price) { showToast("Недостаточно средств", "error"); return; }
+        user.balance -= price; if(!user.businesses) user.businesses = {}; user.businesses[type] = count + 1;
+        saveDB(); updateBalanceDisplayQuiet(); renderBusinesses(); showToast("Приобретено", "success");
+    }
+
+    window.openDeposit = function() { const amt = parseFloat(document.getElementById('deposit-amount').value); const user = getState(); if(user.credit && user.credit.active) { showToast("Требуется погашение кредита", "error"); return; } if(!amt || amt < 10 || amt > user.balance) { showToast("Некорректная сумма", "error"); return; } progressQuest('deposits'); user.balance -= amt; user.deposits.push({ amount: amt, endTime: Date.now() + (5 * 60 * 1000) }); saveDB(); addTransaction("Вклад", -amt, '🌾'); updateBalanceDisplayQuiet(); document.getElementById('deposit-amount').value = ''; renderUsefulFull(); showToast("Вклад оформлен", "success"); }
+    window.takeCredit = function() { const user = getState(); if(user.credit && user.credit.active) { showToast("Активный кредит существует", "error"); return; } let cData = getCreditData(); user.balance += cData.limit; user.credit = { active: true, dueTime: Date.now() + (5 * 60 * 1000) }; saveDB(); addTransaction("Получение кредита", cData.limit, '💳'); updateBalanceDisplayQuiet(); renderUsefulFull(); showPush("Кредит", `Средства зачислены: ${cData.limit} $`, "🚨", false); }
+    window.payCredit = function() { const user = getState(); let cData = getCreditData(); if(user.balance < cData.cReturn) { showToast("Недостаточно средств", "error"); return; } user.balance -= cData.cReturn; user.credit = { active: false }; user.creditScore = Math.min(250, Number(user.creditScore || 100) + 20); saveDB(); addTransaction("Погашение кредита", -cData.cReturn, '✅'); updateBalanceDisplayQuiet(); renderUsefulFull(); showToast("Кредит погашен", "success"); }
+
+    window.startSmuggling = function() {
+        const amt = parseFloat(document.getElementById('smuggling-amount').value);
+        const user = getState();
+        if(user.smuggling && user.smuggling.active) { showToast("Операция уже в процессе", "error"); return; }
+        if(user.energy < 30) { showToast("Недостаточно энергии", "error"); return; }
+        if(!amt || amt < 50000 || amt > user.balance) { showToast("Некорректная сумма", "error"); return; }
+        user.balance -= amt; user.energy -= 30;
+        user.smuggling = { active: true, amount: amt, endTime: Date.now() + (10 * 60 * 1000) };
+        saveDB(); addTransaction("Отправка груза", -amt, '🚚');
+        updateBalanceDisplayQuiet(); document.getElementById('smuggling-amount').value = ''; renderUsefulFull();
+        showToast("Груз отправлен", "success");
+    }
+
+    window.buyMiner = function() {
+        const user = getState(); let count = user.miners || 0; let price = 100000 * Math.pow(1.2, count);
+        if(user.balance < price) { showToast("Недостаточно средств", "error"); return; }
+        user.balance -= price; user.miners = count + 1; saveDB(); updateBalanceDisplayQuiet(); renderUsefulFull(); showToast("Оборудование закуплено", "success");
+    };
+
+    window.buyOffshore = function() {
+        const user = getState(); if(user.hasOffshore) { showToast("Счет уже открыт", "info"); return; }
+        if(user.balance < 500000) { showToast("Недостаточно средств", "error"); return; }
+        user.balance -= 500000; user.hasOffshore = true; saveDB(); updateBalanceDisplayQuiet(); renderUsefulFull(); showToast("Счет активирован", "success");
+    };
+
+    window.openCardDetails = function() { switchTab('screen-card-details', document.querySelectorAll('.nav-item')[0]); flipCardInner.style.transform = 'rotateY(0deg)'; isFlipped = false; }
+    
+    const flipCardInner = document.getElementById('flip-card-inner'); const flipCard = document.getElementById('flip-card');
+    function triggerFlip(direction) { if (!isFlipped) { flipCardInner.style.transform = direction === 'left' ? 'rotateY(-180deg)' : 'rotateY(180deg)'; isFlipped = true; } else { flipCardInner.style.transform = 'rotateY(0deg)'; isFlipped = false; isPinVisible = false; document.getElementById('card-pin-display').innerText = "****"; } }
+    flipCard.addEventListener('touchstart', e => { touchstartX = e.changedTouches[0].screenX; }); flipCard.addEventListener('touchend', e => { let diff = e.changedTouches[0].screenX - touchstartX; if (Math.abs(diff) > 40) triggerFlip(diff > 0 ? 'right' : 'left'); }); flipCard.addEventListener('click', e => { if(e.target.innerText === '👁') return; triggerFlip('right'); });
+    window.togglePin = function(event) { if(event) event.stopPropagation(); isPinVisible = !isPinVisible; document.getElementById('card-pin-display').innerText = isPinVisible ? getState().pin : "****"; }
+
+    window.toggleLockCard = function() { const user = getState(); user.isLocked = !user.isLocked; saveDB(); applyLockStatusVisually(); showPush("Статус безопасности", user.isLocked ? "Карта заблокирована" : "Карта активна", user.isLocked ? "🔒" : "🔓"); }
+    function applyLockStatusVisually() { const user = getState(); const mainShield = document.getElementById('main-iron-shield'); const detailShield = document.getElementById('detail-iron-shield'); const btnLock = document.getElementById('btn-lock'); if(user.isLocked) { mainShield.classList.add('active'); detailShield.classList.add('active'); btnLock.innerText = "Разблокировать карту 🔓"; btnLock.classList.remove('btn-danger'); btnLock.style.background = "var(--success)"; btnLock.style.color = "#fff"; btnLock.style.borderColor = "var(--success)"; } else { mainShield.classList.remove('active'); detailShield.classList.remove('active'); btnLock.innerText = "Заблокировать карту 🔒"; btnLock.classList.add('btn-danger'); btnLock.style.background = ""; btnLock.style.color = ""; btnLock.style.borderColor = ""; } }
+    
+    function applySkin(skinName) { document.getElementById('app-root').classList.remove('skin-gold', 'skin-neon', 'skin-glass', 'skin-fire', 'skin-matrix', 'skin-plasma', 'skin-rgb', 'skin-ocean', 'skin-gold-anim', 'skin-toxic', 'skin-hologram', 'skin-lightning', 'skin-void', 'skin-dragon', 'skin-god'); if(skinName && skinName !== 'default') document.getElementById('app-root').classList.add(skinName); }
+    
+    window.openSkinsModal = function() { 
+        document.getElementById('skins-modal').classList.add('active'); 
+        let currentSkin = getState().skin || 'default'; 
+        document.getElementById('skin-preview-container').className = currentSkin;
+        renderSkinsList();
+    }
+
+    function renderSkinsList() {
+        const user = getState();
+        const container = document.getElementById('skins-list-container');
+        let html = '';
+        skinsConfig.forEach(s => {
+            const isOwned = user.ownedSkins && user.ownedSkins.includes(s.id);
+            const isActive = user.skin === s.id;
+            let btnText = isOwned ? (isActive ? "Установлено" : "Выбрать") : `${s.name} — ${s.price.toLocaleString('ru-RU')} $`;
+            let classBtn = isActive ? "btn-main" : (isOwned ? "btn-main btn-primary" : "btn-main");
+            html += `<button class="${classBtn}" style="${s.style} opacity:${isActive ? '0.5' : '1'}; margin-bottom: 5px; text-shadow:none;" onclick="previewAndBuySkin('${s.id}', ${s.price})" ${isActive ? 'disabled' : ''}>${btnText}</button>`;
+        });
+        container.innerHTML = html;
+    }
+    
+    window.previewAndBuySkin = function(skinName, price) { 
+        const user = getState(); document.getElementById('skin-preview-container').className = skinName; 
+        if(user.skin === skinName) return; 
+        if(user.ownedSkins && user.ownedSkins.includes(skinName)) { user.skin = skinName; saveDB(); applySkin(skinName); renderSkinsList(); showToast("Дизайн установлен", "success"); return; }
+        if(user.balance < price) { showToast("Недостаточно средств", "error"); return; } 
+        if(confirm(`Оформить дизайн за ${price.toLocaleString('ru-RU')} $?`)) { user.balance -= price; user.skin = skinName; if(!user.ownedSkins) user.ownedSkins = ['default']; user.ownedSkins.push(skinName); saveDB(); applySkin(skinName); updateBalanceDisplayQuiet(); renderSkinsList(); showToast("Дизайн приобретен", "success"); }
+    }
+
+    window.openUpgrades = function() { renderUpgrades(); document.getElementById('upgrades-modal').classList.add('active'); }
+    function renderUpgrades() {
+        const user = getState();
+        let nextClickPower = clickTiers[user.clickTier + 1];
+        if(nextClickPower) { document.getElementById('upg-click-desc').innerText = `Доход: ${(user.clickPower).toFixed(2)} → ${(nextClickPower).toFixed(2)} $`; document.getElementById('upg-click-btn').innerText = `${user.clickUpgradePrice} $`; document.getElementById('upg-click-btn').disabled = false; } else { document.getElementById('upg-click-desc').innerText = `Максимальный уровень`; document.getElementById('upg-click-btn').innerText = `MAX`; document.getElementById('upg-click-btn').disabled = true; }
+        let nextAuto = getNextAuto(user.autoClicker);
+        if(nextAuto) { document.getElementById('upg-auto-desc').innerText = `Доход: ${(user.autoClicker).toFixed(2)} → ${(nextAuto).toFixed(2)} $/сек`; document.getElementById('upg-auto-btn').innerText = `${user.autoUpgradePrice} $`; document.getElementById('upg-auto-btn').disabled = false; } else { document.getElementById('upg-auto-desc').innerText = `Максимальный уровень`; document.getElementById('upg-auto-btn').innerText = `MAX`; document.getElementById('upg-auto-btn').disabled = true; }
+    }
+    window.buyUpgrade = function(type) {
+        const user = getState();
+        if(type === 'click') { let next = clickTiers[user.clickTier + 1]; if(!next) return; if(user.balance < user.clickUpgradePrice) { showToast("Недостаточно средств", "error"); return; } user.balance -= user.clickUpgradePrice; user.clickTier++; user.clickPower = clickTiers[user.clickTier]; user.clickUpgradePrice = Math.floor(user.clickUpgradePrice * 2.5); document.getElementById('btn-earn').innerText = `Получить ${(user.clickPower).toFixed(2)} $`; } 
+        else if (type === 'auto') { let next = getNextAuto(user.autoClicker); if(!next) return; if(user.balance < user.autoUpgradePrice) { showToast("Недостаточно средств", "error"); return; } user.balance -= user.autoUpgradePrice; user.autoClicker = next; user.autoUpgradePrice = Math.floor(user.autoUpgradePrice * 3); }
+        saveDB(); updateBalanceDisplayQuiet(); renderUpgrades(); showToast("Улучшение выполнено", "success");
+    }
+
+    let lastClickTime = 0; let clicksInSecond = 0;
+    window.earnMoney = function(event) { 
+        if (event && !event.isTrusted) { showToast("Доступ ограничен", "error"); return; }
+        const user = getState(); if(!user) return;
+        if(user.isLocked) { showToast("Разблокируйте карту", "error"); return; } 
+        const now = Date.now();
+        if (now - lastClickTime < 1000) { clicksInSecond++; if (clicksInSecond > 10) { showToast("Лимит операций", "warning"); return; } } 
+        else { clicksInSecond = 1; lastClickTime = now; }
+        progressQuest('clicks'); user.balance = parseFloat((user.balance + user.clickPower).toFixed(2)); saveDB(); updateBalanceDisplayQuiet();
+    };
+
+    function updateBalanceDisplayQuiet() { 
+        const user = getState(); if(!user) return; 
+        const formatted = user.balance.toLocaleString('ru-RU', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' $'; 
+        document.getElementById('dashboard-balance').innerText = formatted; 
+        document.getElementById('top-balance').innerText = formatted; 
+        document.getElementById('detail-balance').innerText = formatted; 
+        document.getElementById('from-card-input').value = `VISA **** ${(user.cardNumber || "0000").slice(-4)} (${formatted})`;
+        
+        let stars = ""; let wl = user.wantedLevel || 0;
+        for(let i=0; i<5; i++) stars += (i < wl) ? "★" : "☆";
+        document.getElementById('wanted-level-container').innerText = stars;
+        document.getElementById('energy-display').innerText = user.energy || 0;
+        
+        let netWorth = user.balance;
+        for(let id in user.portfolio) { let asset = stocksMarket.find(a => a.id === id) || cryptoMarket.find(a => a.id === id); if(asset && user.portfolio[id].qty > 0) netWorth += user.portfolio[id].qty * asset.hist1H[asset.hist1H.length-1]; }
+        document.getElementById('profile-net-worth').innerText = netWorth.toLocaleString('ru-RU', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' $';
+        
+        checkTransferForm();
+    }
+
+    function addTransaction(title, amount, icon) { const user = getState(); if(!user.history) user.history = []; user.history.unshift({ icon: icon, title: title, date: new Date().toLocaleString('ru-RU', {day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit'}), amount: amount, type: amount >= 0 ? 'plus' : 'minus' }); saveDB(); renderHistory(); }
+
+    function renderHistory() { 
+        const user = getState(); const container = document.getElementById('history-container'); container.innerHTML = ''; 
+        if(!user || !user.history || user.history.length === 0) { container.innerHTML = '<div style="color:var(--text-muted); font-size:12px;">Операции отсутствуют.</div>'; return; } 
+        user.history.slice(0, 15).forEach((t, i) => { 
+            const amountStr = t.type === 'plus' ? `+ ${t.amount.toFixed(2)} $` : `- ${Math.abs(t.amount).toFixed(2)} $`; 
+            container.innerHTML += `<div class="transaction" onclick="openHistoryMenu(${i})"><div class="t-left"><div class="t-icon">${t.icon}</div><div><div class="t-title">${t.title}</div><div class="t-date">${t.date}</div></div></div><div class="t-amount ${t.type}">${amountStr}</div></div>`; 
+        }); 
+    }
+
+    // ОБРАБОТЧИКИ ТАЙМЕРОВ И ЛОГИКИ
+    setInterval(() => {
+        try {
+            let needsUpdate = false; const user = getState(); if(!user) return; 
+            
+            const now = Date.now(); let passive = 0;
+            if(user.autoClicker > 0) passive += user.autoClicker;
+            if(user.businesses) { bizConfig.forEach(biz => { if(user.businesses[biz.id] > 0) passive += (user.businesses[biz.id] * biz.baseIncome); }); }
+            
+            if(passive > 0 && !user.isLocked) { user.balance = parseFloat((user.balance + passive).toFixed(2)); needsUpdate = true; }
+            
+            if(user.deposits && user.deposits.length > 0) {
+                for(let i = user.deposits.length - 1; i >= 0; i--) { let dep = user.deposits[i]; if(now >= dep.endTime) { let payout = parseFloat((dep.amount * 1.05).toFixed(2)); user.balance = parseFloat((user.balance + payout).toFixed(2)); user.history.unshift({ icon: '🌾', title: "Выплата", date: new Date().toLocaleString('ru-RU', {day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit'}), amount: payout, type: 'plus' }); showPush("Вклад", `Выплата: ${payout} $`, "🌾"); user.deposits.splice(i, 1); needsUpdate = true; } }
+            }
+            
+            if(user.credit && user.credit.active) {
+                if(now >= user.credit.dueTime) { showPush("Уведомление", "Срок истек. Инициация списания.", "🚨", true); for (let id in user.portfolio) { user.portfolio[id].qty = 0; user.portfolio[id].avgPrice = 0; } user.balance = 0; user.clickTier = 0; user.clickPower = 0.10; user.clickUpgradePrice = 500; user.autoClicker = 0; user.autoUpgradePrice = 5000; user.skin = 'default'; user.deposits = []; user.credit = { active: false }; user.businesses = {}; user.isLocked = true; user.creditScore = 10; user.miners = 0; user.hasOffshore = false; user.history.unshift({ icon: '🚨', title: "БАНКРОТСТВО", date: new Date().toLocaleString('ru-RU'), amount: 0, type: 'minus' }); applyLockStatusVisually(); applySkin(user.skin); document.getElementById('btn-earn').innerText = `Получить 0.10 $`; if(document.getElementById('upgrades-modal').classList.contains('active')) renderUpgrades(); needsUpdate = true; }
+            }
+
+            if(user.smuggling && user.smuggling.active) {
+                if(now >= user.smuggling.endTime) {
+                    let amt = user.smuggling.amount;
+                    if(Math.random() < 0.3) {
+                        let win = amt * 3; user.balance += win; user.history.unshift({ icon: '🚚', title: "Операция завершена", date: new Date().toLocaleString('ru-RU', {day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit'}), amount: win, type: 'plus' }); showPush("Транспорт", `Успех. Доход: ${win.toLocaleString('ru-RU')} $`, "🚚"); showSuccessEffect();
+                    } else {
+                        user.wantedLevel = Math.min(5, (user.wantedLevel||0) + 2);
+                        let fine = Math.floor(amt * 0.5); if(user.balance >= fine) user.balance -= fine; else { fine = user.balance; user.balance = 0; }
+                        user.history.unshift({ icon: '🚨', title: "Конфискация", date: new Date().toLocaleString('ru-RU', {day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit'}), amount: -fine, type: 'minus' }); showPush("Внимание", `Груз задержан. Штраф ${fine.toLocaleString('ru-RU')} $.`, "🚨", true);
+                    }
+                    user.smuggling = { active: false }; needsUpdate = true;
+                }
+            }
+
+            if(user.wantedLevel > 0) {
+                if(!user.nextRaidTime || user.raidScheduledLevel !== user.wantedLevel) {
+                    let maxMins = 10;
+                    if(user.wantedLevel === 1) maxMins = 10;
+                    else if(user.wantedLevel === 2 || user.wantedLevel === 3) maxMins = 7;
+                    else if(user.wantedLevel === 4) maxMins = 3;
+                    else maxMins = 1;
+                    user.nextRaidTime = Date.now() + (Math.random() * maxMins * 60 * 1000);
+                    user.raidScheduledLevel = user.wantedLevel;
+                    needsUpdate = true;
+                } else if(Date.now() >= user.nextRaidTime) {
+                    if (user.wantedLevel <= 3 && Math.random() > 0.2) { 
+                        user.nextRaidTime = Date.now() + (Math.random() * 10 * 60 * 1000); 
+                        showPush("Сводка", "Проверка миновала", "ℹ️", false);
+                    } else {
+                        let raidTax = Math.floor(user.balance * 0.3);
+                        user.balance -= raidTax; user.wantedLevel = 0; user.nextRaidTime = null; user.raidScheduledLevel = 0;
+                        addTransaction("Конфискация", -raidTax, '🚓');
+                        showPush("Внимание", `Изъятие активов (${raidTax.toLocaleString('ru-RU')} $)`, "🚓", true);
+                    }
+                    needsUpdate = true;
+                }
+            } else if (user.nextRaidTime) {
+                user.nextRaidTime = null; user.raidScheduledLevel = 0; needsUpdate = true;
+            }
+
+            if(needsUpdate) { saveDB(); updateBalanceDisplayQuiet(); if(document.getElementById('screen-dashboard').classList.contains('active')) renderHistory(); if(document.getElementById('screen-useful').classList.contains('active')) { renderUsefulFull(); } } 
+            else { if(document.getElementById('screen-useful').classList.contains('active')) renderUsefulTimersOnly(); }
+        } catch (e) { }
+    }, 1000);
+    
+    setInterval(() => { try { const user = getState(); if(!user) return; if(user.energy < 100) { user.energy = Math.min(100, (user.energy || 0) + 5); saveDB(); updateBalanceDisplayQuiet(); } } catch(e){} }, 60000);
+
+    setInterval(() => {
+        try {
+            const user = getState(); if(!user || user.isLocked) return; let needsUpdate = false;
+            if(user.balance > 100000 && !user.hasOffshore) { let tax = Math.floor(user.balance * 0.01); user.balance -= tax; addTransaction("Налог", -tax, '🏛️'); showPush("Уведомление", `Списание 1% (${tax} $)`, "🏛️"); needsUpdate = true; }
+            if(user.balance > 50000 && !user.hasOffshore && Math.random() < 0.1) { let raidTax = Math.floor(user.balance * 0.2); user.balance -= raidTax; addTransaction("Сбор", -raidTax, '👮'); showPush("Уведомление", `Изъятие 20% (${raidTax} $). Рекомендуется открыть офшор.`, "👮", true); needsUpdate = true; }
+            if(user.miners && user.miners > 0) { let mined = parseFloat((user.miners * 0.01).toFixed(4)); let btc = user.portfolio['bite'] || {qty: 0, avgPrice: 0}; btc.qty = parseFloat((btc.qty + mined).toFixed(4)); user.portfolio['bite'] = btc; needsUpdate = true; }
+            if(needsUpdate) { saveDB(); updateBalanceDisplayQuiet(); if(document.getElementById('screen-stocks').classList.contains('active')) renderStocks(); }
+        } catch(e) {}
+    }, 60000);
+
+    setInterval(() => {
+        try {
+            const user = getState(); if(!user) return; 
+            if(Math.random() < 0.08 && !activeNews) { const allAssets = [...stocksMarket, ...cryptoMarket]; const asset = allAssets[Math.floor(Math.random() * allAssets.length)]; const isGood = Math.random() < 0.5; let title = isGood ? `Тренд ${asset.name}` : `Снижение ${asset.name}`; let desc = isGood ? `Положительная динамика` : `Отрицательная динамика`; showPush(title, desc, asset.icon, !isGood, true); globalNews.unshift({ time: new Date().toLocaleString('ru-RU', {hour: '2-digit', minute:'2-digit'}), title: title, text: desc, icon: asset.icon, isGood: isGood }); if(globalNews.length > 10) globalNews.pop(); saveNews(); activeNews = { id: asset.id, isGood: isGood, ticksLeft: 6 }; }
+            const updateAsset = (s, isCrypto) => { let vol = isCrypto ? 0.05 : 0.005; let changePercent = (Math.random() * vol * 2) - vol; if (!isCrypto && Math.random() < 0.25) changePercent = 0; if(activeNews && activeNews.id === s.id) { changePercent = activeNews.isGood ? (Math.random() * 0.1 + 0.05) : -(Math.random() * 0.1 + 0.05); activeNews.ticksLeft--; if(activeNews.ticksLeft <= 0) activeNews = null; } let newPrice = s.hist1H[s.hist1H.length-1] * (1 + changePercent); s.hist1H.push(parseFloat(newPrice.toFixed(2))); if(s.hist1H.length > 15) s.hist1H.shift(); };
+            stocksMarket.forEach(s => updateAsset(s, false)); cryptoMarket.forEach(s => updateAsset(s, true));
+            if(document.getElementById('screen-stocks').classList.contains('active')) renderStocks();
+            
+            if(document.getElementById('stock-modal').classList.contains('active') && currentStockId) {
+                const stock = [...stocksMarket, ...cryptoMarket].find(s => s.id === currentStockId);
+                document.getElementById('modal-stock-price').innerText = stock.hist1H[stock.hist1H.length-1].toFixed(2) + ' $';
+                const portfolioData = user.portfolio[currentStockId] || {qty: 0, avgPrice: 0};
+                drawChart(stock['hist' + currentChartTab], portfolioData.avgPrice, portfolioData.qty > 0);
+                window.updateStockCalc();
+            }
+        } catch (e) {}
+    }, 5000);
+
+    window.openSafe = function() { const user = getState(); if(user.balance < 10000) { showToast("Недостаточно средств", "error"); return; } user.balance -= 10000; const rand = Math.random(); let win = 0; let msg = ""; let icon = "📦"; if(rand < 0.90) { win = 1; msg = "Минимальная выплата."; icon = "ℹ️"; } else if(rand < 0.98) { win = 15000; msg = "Сумма: 15 000 $."; icon = "💵"; } else if(rand < 0.999) { win = 50000; msg = "Успех! 50 000 $."; icon = "💰"; showSuccessEffect(); } else { win = 100000; msg = "ДЖЕКПОТ! 100 000 $!"; icon = "💎"; showSuccessEffect(); } user.balance += win; addTransaction("Сейф", win - 10000, icon); saveDB(); updateBalanceDisplayQuiet(); showPush("Сейф", msg, icon); }
+    window.simulateTopUp = function() { const user = getState(); if(user.isLocked) { showToast("Разблокируйте карту", "error"); return; } const now = Date.now(); const cooldown = 5 * 60 * 60 * 1000; if (now - user.lastTopUpTime < cooldown) { showToast(`Ожидайте лимита`, "warning"); return; } user.balance = parseFloat((user.balance + 100).toFixed(2)); user.lastTopUpTime = now; saveDB(); addTransaction("Зачисление", 100, '🏧'); updateBalanceDisplayQuiet(); document.getElementById('topup-modal').classList.remove('active'); showPush("Пополнение", "Зачислено <b>100 $</b>", "🏧"); }
+    window.openHackMiniGame = function() { const user = getState(); if(user.isLocked) { showToast("Разблокируйте карту", "error"); return; } if(user.energy < 15) { showToast("Недостаточно энергии", "error"); return; } if(user.balance < 500) { showToast("Недостаточно средств", "error"); return; } user.balance -= 500; user.energy -= 15; saveDB(); updateBalanceDisplayQuiet(); document.getElementById('hack-modal').classList.add('active'); currentHackPin = generateRandomNum(6); document.getElementById('hack-pin-display').innerText = currentHackPin; document.getElementById('hack-input').value = ''; document.getElementById('hack-input').focus(); let timeLeft = 5; document.getElementById('hack-timer').innerText = timeLeft; clearInterval(hackInterval); hackInterval = setInterval(() => { timeLeft--; document.getElementById('hack-timer').innerText = timeLeft; if(timeLeft <= 0) { clearInterval(hackInterval); failHack(); } }, 1000); }
+    window.submitHack = function() { if(document.getElementById('hack-input').value === currentHackPin) { clearInterval(hackInterval); document.getElementById('hack-modal').classList.remove('active'); let win = 500 + Math.floor(Math.random() * 701); const user = getState(); user.balance += win; progressQuest('hack'); saveDB(); addTransaction("Операция", win, '💻'); updateBalanceDisplayQuiet(); showPush("Успех", `Зачислено ${win} $`, "💻"); showSuccessEffect(); } else { failHack(); } }
+    function failHack() { clearInterval(hackInterval); document.getElementById('hack-modal').classList.remove('active'); const user = getState(); user.isLocked = true; let penalty = Math.floor(user.balance * 0.1); user.balance -= penalty; user.wantedLevel = Math.min(5, (user.wantedLevel||0) + 2); saveDB(); applyLockStatusVisually(); updateBalanceDisplayQuiet(); addTransaction("Штраф", -penalty, '🚨'); showPush("Внимание", "Ошибка. Блокировка и списание 10%.", "🚨", true); }
+
+    window.openHistoryMenu = function(index) {
+        const user = getState(); if(!user || !user.history || !user.history[index]) return;
+        const item = user.history[index];
+        const actionsDiv = document.getElementById('history-menu-actions');
+        let html = '';
+        if (item.title.startsWith('Перевод от ')) { html += `<button class="btn-main btn-primary" onclick="prepareReplyTransfer()">Ответить</button>`; } else if (item.title.startsWith('Перевод ')) { html += `<button class="btn-main btn-primary" onclick="prepareReplyTransfer()">Повторить</button>`; }
+        html += `<button class="btn-main btn-danger" style="background:transparent;" onclick="deleteHistoryItem(${index})">Удалить</button>`;
+        actionsDiv.innerHTML = html;
+        document.getElementById('history-menu-modal').classList.add('active');
+    };
+
+    window.deleteHistoryItem = function(index) { const user = getState(); user.history.splice(index, 1); saveDB(); renderHistory(); document.getElementById('history-menu-modal').classList.remove('active'); showToast("Удалено", "success"); };
+    window.prepareReplyTransfer = function() { document.getElementById('history-menu-modal').classList.remove('active'); openTransfer(); };
+
+    window.openTransfer = function() { if(getState().isLocked) { showToast("Разблокируйте карту", "error"); return; } switchTab('screen-payments', document.querySelectorAll('.nav-item')[1]); }
+    window.formatCard = function(input) { input.value = input.value.replace(/\D/g, '').replace(/(.{4})/g, '$1 ').trim(); checkTransferForm(); }
+    window.checkTransferForm = function() { const card = document.getElementById('transfer-card').value; const amount = parseFloat(document.getElementById('transfer-amount').value); document.getElementById('btn-transfer').disabled = !(card.length === 19 && amount > 0 && amount <= getState().balance && !getState().isLocked); }
+    
+    window.executeTransfer = function() { 
+        const sender = getState(); const cardInput = document.getElementById('transfer-card').value.replace(/\s/g, ''); const amount = parseFloat(document.getElementById('transfer-amount').value); const btn = document.getElementById('btn-transfer');
+        if(cardInput === sender.cardNumber) { showToast("Ошибка реквизитов", "error"); return; } 
+        btn.innerText = "Обработка..."; btn.disabled = true;
+        database.ref('users').orderByChild('cardNumber').equalTo(cardInput).once('value').then(snapshot => {
+            if(snapshot.exists()) {
+                let receiverKey = Object.keys(snapshot.val())[0]; let receiverData = snapshot.val()[receiverKey];
+                database.ref('users/' + receiverKey + '/incoming_transfers').push({ amount: amount, senderName: sender.name, date: new Date().toLocaleString('ru-RU', {day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit'}) }).then(() => { 
+                    sender.balance -= amount; sender.history.unshift({ icon: '💸', title: `Перевод ${receiverData.name}`, date: new Date().toLocaleString('ru-RU', {day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit'}), amount: -amount, type: 'minus' }); saveDB(); 
+                    document.getElementById('transfer-card').value = ''; document.getElementById('transfer-amount').value = ''; btn.innerText = "Отправить средства"; btn.disabled = false; updateBalanceDisplayQuiet(); renderHistory(); switchTab('screen-dashboard', document.getElementById('nav-item-home')); showPush("Перевод доставлен", `Адресат: <b>${receiverData.name}</b>`, "💸"); 
+                }).catch(() => { showToast("Ошибка сети", "error"); btn.innerText = "Отправить средства"; btn.disabled = false; });
+            } else { 
+                sender.balance -= amount; sender.history.unshift({ icon: '💸', title: `Перевод *${cardInput.slice(-4)}`, date: new Date().toLocaleString('ru-RU', {day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit'}), amount: -amount, type: 'minus' }); saveDB(); 
+                document.getElementById('transfer-card').value = ''; document.getElementById('transfer-amount').value = ''; btn.innerText = "Отправить средства"; btn.disabled = false; updateBalanceDisplayQuiet(); renderHistory(); switchTab('screen-dashboard', document.getElementById('nav-item-home')); showPush("Перевод выполнен", `Сумма: <b>${amount} $</b>`, "💸"); 
+            }
+        }).catch(err => { showToast("Ошибка связи", "error"); btn.innerText = "Отправить средства"; btn.disabled = false; });
+    }
 
     window.addEventListener('load', checkAuthState);
 </script>
