@@ -220,16 +220,6 @@
         </div>
     </div>
 
-    <div class="modal-overlay" id="ad-modal" onclick="if(event.target.id==='ad-modal') closeModal(event, 'ad-modal')">
-        <div class="modal-content" style="text-align:center;">
-            <div class="close-modal" onclick="document.getElementById('ad-modal').classList.remove('active')">✕</div>
-            <h3 style="margin-bottom:15px; font-size:18px;">📺 Реклама</h3>
-            <p id="ad-modal-text" style="font-size:13px; color:var(--text-muted); margin-bottom:20px; line-height:1.4;">Текст</p>
-            <div id="ad-limit-text" style="font-size:12px; color:var(--warning); margin-bottom:15px; display:none;">Осталось просмотров: 3/3</div>
-            <button type="button" class="btn-main btn-primary" id="btn-watch-ad" onclick="watchAd()">Смотреть ролик</button>
-        </div>
-    </div>
-
     <div id="screen-app-pin" class="screen auth-screen">
         <div style="text-align: center; margin-top: 30px;">
             <div class="avatar" style="width:64px; height:64px; font-size:28px; margin:0 auto 15px;" id="pin-avatar">👤</div>
@@ -285,9 +275,8 @@
         <header>
             <div class="greeting"><p>Ваш баланс</p><h1 id="top-balance">0.00 $</h1></div>
             <div style="display:flex; align-items:center; gap:12px;">
-                <div style="text-align:right; font-size:12px; color:var(--warning); font-weight:600; display:flex; align-items:center; gap:5px;">
-                    <span>⚡ <span id="energy-display">100</span></span>
-                    <button class="btn-main btn-success" style="width:22px; height:22px; padding:0; font-size:14px; border-radius:4px; line-height:1;" onclick="openAdModal('energy')">+</button>
+                <div style="text-align:right; font-size:12px; color:var(--warning); font-weight:600;">
+                    ⚡ <span id="energy-display">100</span>
                 </div>
                 <div class="avatar" onclick="switchTab('screen-profile', document.getElementById('nav-item-profile'))" id="dashboard-avatar">👤</div>
             </div>
@@ -438,7 +427,6 @@
             </div>
         </div>
 
-        <button type="button" class="btn-main btn-success" style="margin-bottom: 10px;" onclick="openAdModal('money')">📺 Заработать 500 $ (Реклама)</button>
         <button type="button" class="btn-main" style="margin-bottom: 20px;" onclick="openLeaderboard()">🏆 Рейтинг игроков</button>
 
         <div style="background: var(--bg-surface); border-radius: 12px; padding: 15px; margin-bottom: 25px; border:1px solid var(--border);">
@@ -734,96 +722,6 @@
 </div>
 
 <script>
-    // --- РЕКЛАМНАЯ ЛОГИКА ---
-    let currentAdType = '';
-
-    window.openAdModal = function(type) {
-        const user = getState();
-        if (!user) return;
-        
-        if(!user.ads) user.ads = { moneyWatches: 0, lastWatchDate: "" };
-
-        currentAdType = type;
-        const modalText = document.getElementById('ad-modal-text');
-        const limitText = document.getElementById('ad-limit-text');
-        const btnWatch = document.getElementById('btn-watch-ad');
-        
-        if(type === 'energy') {
-            if (user.energy >= 100) {
-                showToast("Энергия уже полная!", "info");
-                return;
-            }
-            modalText.innerText = "Посмотреть короткий рекламный ролик для восполнения энергии до 100⚡?";
-            limitText.style.display = 'none';
-            btnWatch.disabled = false;
-            btnWatch.innerText = "Смотреть ролик";
-        } else if(type === 'money') {
-            const today = new Date().toLocaleDateString('ru-RU');
-            if (user.ads.lastWatchDate !== today) {
-                user.ads.moneyWatches = 0;
-                user.ads.lastWatchDate = today;
-            }
-            
-            modalText.innerText = "Посмотреть короткий рекламный ролик для пополнения баланса на 500 $?";
-            limitText.style.display = 'block';
-            let viewsLeft = 3 - user.ads.moneyWatches;
-            limitText.innerText = `Осталось просмотров сегодня: ${viewsLeft}/3`;
-            
-            if(viewsLeft <= 0) {
-                btnWatch.disabled = true;
-                btnWatch.innerText = "Лимит исчерпан";
-            } else {
-                btnWatch.disabled = false;
-                btnWatch.innerText = "Смотреть ролик";
-            }
-        }
-        
-        document.getElementById('ad-modal').classList.add('active');
-    };
-
-    window.watchAd = function() {
-        const btnWatch = document.getElementById('btn-watch-ad');
-        btnWatch.disabled = true;
-        btnWatch.innerText = "Ожидание...";
-        
-        // Мы убрали принудительное открытие сайта.
-        // Теперь при клике по экрану Monetag сам решит, показать ли Виньетку (баннер).
-        
-        // Ждем 10 секунд и начисляем награду игроку
-        setTimeout(() => {
-            const user = getState();
-            if(!user) return;
-
-            if(currentAdType === 'energy') {
-                user.energy = 100;
-                saveDB();
-                updateBalanceDisplayQuiet();
-                showToast("Энергия восстановлена!", "success");
-                showPush("Энергия", "Энергия восполнена до 100⚡", "⚡");
-            } else if(currentAdType === 'money') {
-                const today = new Date().toLocaleDateString('ru-RU');
-                if (user.ads.lastWatchDate !== today) {
-                    user.ads.moneyWatches = 0;
-                    user.ads.lastWatchDate = today;
-                }
-                
-                if (user.ads.moneyWatches < 3) {
-                    user.ads.moneyWatches++;
-                    user.balance += 500;
-                    saveDB();
-                    updateBalanceDisplayQuiet();
-                    addTransaction("Награда за просмотр", 500, '📺');
-                    showToast("Баланс пополнен!", "success");
-                    showPush("Награда", "Получено 500 $ за рекламу", "📺");
-                    showSuccessEffect();
-                }
-            }
-            
-            document.getElementById('ad-modal').classList.remove('active');
-        }, 10000); // Таймер на 10 секунд
-    };
-
-
     // --- БАЗОВАЯ ИНИЦИАЛИЗАЦИЯ И FIREBASE ---
     window.sendVerificationCode = function() { 
         tempRegEmail = document.getElementById('reg-email').value.trim().toLowerCase(); 
@@ -924,7 +822,6 @@
         u.ownedSkins = u.ownedSkins || ['default'];
         u.skin = u.skin || 'default';
         u.cardNumber = u.cardNumber || "0000000000000000";
-        if(!u.ads) u.ads = { moneyWatches: 0, lastWatchDate: "" };
         
         return u;
     }
@@ -1008,7 +905,7 @@
         { id: 'skin-glass', name: 'Стеклянная', price: 250000, style: 'background:rgba(255,255,255,0.05); color:#fff; backdrop-filter: blur(15px); border:1px solid rgba(255,255,255,0.2);' },
         { id: 'skin-fire', name: '🔥 Огненная', price: 1000000, style: 'background:linear-gradient(270deg, #8b0000, #ff4500); color:#fff; animation: fireAnim 3s infinite;' },
         { id: 'skin-matrix', name: '💻 Матрица', price: 2500000, style: 'background:#000; color:#0f0;' },
-        { id: 'skin-plasma', name: '🌌 Плазма', price: 5000000, style: 'background:linear-gradient(270deg, #8A2BE2, #0000FF); color:#fff;' },
+        { id: 'skin-plasma', name: '🌌 Плазма', price: 5000000, style: 'background:linear-gradient(270deg, #8A2BE2, #4B0082, #0000FF); color:#fff;' },
         { id: 'skin-rgb', name: '🎮 RGB Геймер', price: 7500000, style: 'background:#111; color:#fff; border:1px solid #ff0000;' },
         { id: 'skin-ocean', name: '🌊 Океан', price: 10000000, style: 'background:linear-gradient(270deg, #001f3f, #0088cc); color:#fff;' },
         { id: 'skin-gold-anim', name: '✨ Сияющее Золото', price: 25000000, style: 'background:linear-gradient(135deg, #FFDF00, #D4AF37); color:#000;' },
@@ -1027,7 +924,7 @@
     
     window.completeRegistration = function() {
         const name = document.getElementById('reg-name').value.trim(); const pass = document.getElementById('reg-pass').value; const appPin = document.getElementById('reg-app-pin').value; const emailKey = tempRegEmail.replace(/\./g, ',');
-        const newUser = { name: name, password: pass, appPin: appPin, balance: 0.00, energy: 100, cardNumber: generateRandomNum(16), pin: generateRandomNum(4), cvv: generateRandomNum(3), isLocked: false, lastTopUpTime: 0, history: [], portfolio: {}, clickTier: 0, clickPower: 0.10, clickUpgradePrice: 500, autoClicker: 0, autoUpgradePrice: 5000, skin: 'default', ownedSkins: ['default'], deposits: [], credit: {active: false}, creditScore: 100, creditLimit: calculateCreditLimit(), settings: { sounds: true, notifications: true, newsNotifications: true }, businesses: {}, quests: {}, miners: 0, hasOffshore: false, smuggling: {active: false}, wantedLevel: 0, raidScheduledLevel: 0, nextRaidTime: null, ads: { moneyWatches: 0, lastWatchDate: "" } };
+        const newUser = { name: name, password: pass, appPin: appPin, balance: 0.00, energy: 100, cardNumber: generateRandomNum(16), pin: generateRandomNum(4), cvv: generateRandomNum(3), isLocked: false, lastTopUpTime: 0, history: [], portfolio: {}, clickTier: 0, clickPower: 0.10, clickUpgradePrice: 500, autoClicker: 0, autoUpgradePrice: 5000, skin: 'default', ownedSkins: ['default'], deposits: [], credit: {active: false}, creditScore: 100, creditLimit: calculateCreditLimit(), settings: { sounds: true, notifications: true, newsNotifications: true }, businesses: {}, quests: {}, miners: 0, hasOffshore: false, smuggling: {active: false}, wantedLevel: 0, raidScheduledLevel: 0, nextRaidTime: null };
         database.ref('users/' + emailKey).set(newUser).then(() => { db.users[emailKey] = newUser; currentUserKey = emailKey; try { localStorage.setItem('DBank_User_Key', currentUserKey); } catch(e) {} showToast("Аккаунт создан!", "success"); startApp(); });
     }
 
@@ -1846,7 +1743,6 @@
             stocksMarket.forEach(s => updateAsset(s, false)); cryptoMarket.forEach(s => updateAsset(s, true));
             if(document.getElementById('screen-stocks').classList.contains('active')) renderStocks();
             
-            // ОБНОВЛЯЕМ ТОЛЬКО ЦЕНУ И ГРАФИК, ЧТОБЫ НЕ СБРАСЫВАТЬ ПОЛЕ ВВОДА
             if(document.getElementById('stock-modal').classList.contains('active') && currentStockId) {
                 const stock = [...stocksMarket, ...cryptoMarket].find(s => s.id === currentStockId);
                 document.getElementById('modal-stock-price').innerText = stock.hist1H[stock.hist1H.length-1].toFixed(2) + ' $';
