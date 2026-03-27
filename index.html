@@ -29,19 +29,21 @@
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
         :root { --bg-main: #0E1117; --bg-surface: #161B22; --primary: #2F81F7; --text-dark: #FFFFFF; --text-muted: #8B949E; --success: #238636; --danger: #DA3633; --warning: #D29922; --border: #30363D; }
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; -webkit-tap-highlight-color: transparent; }
-        body { background: #000; display: flex; justify-content: center; height: 100vh; height: 100dvh; overflow: hidden; color: #fff; }
+        
+        /* ИСПРАВЛЕНИЕ ДЛЯ iOS (черная полоса и челка) */
+        body { background: var(--bg-main); display: flex; justify-content: center; height: 100vh; height: 100dvh; overflow: hidden; color: #fff; }
         .app-container { width: 100%; max-width: 400px; height: 100vh; height: 100dvh; background: var(--bg-main); position: relative; display: flex; flex-direction: column; border-left: 1px solid var(--border); border-right: 1px solid var(--border); overflow: hidden; }
         
         .push-notif { position: absolute; top: -100px; left: 5%; width: 90%; background: rgba(22, 27, 34, 0.95); backdrop-filter: blur(10px); padding: 15px; border-radius: 12px; border: 1px solid var(--border); z-index: 2000; transition: 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); display: flex; align-items: center; gap: 15px; color: var(--text-dark); border-left: 4px solid var(--primary); box-shadow: 0 8px 24px rgba(0,0,0,0.5); }
-        .push-notif.show { top: 20px; }
+        .push-notif.show { top: calc(20px + env(safe-area-inset-top)); }
         .push-icon { background: rgba(47, 129, 247, 0.1); color: var(--primary); width: 40px; height: 40px; border-radius: 8px; display: flex; justify-content: center; align-items: center; font-size: 20px; }
         
         .toast { position: absolute; top: 20px; left: 50%; transform: translateX(-50%); background: #fff; color: #000; padding: 12px 20px; border-radius: 8px; font-size: 14px; font-weight: 600; z-index: 1000; text-align: center; box-shadow: 0 4px 12px rgba(0,0,0,0.3); width: 90%; max-width: 350px; opacity: 0; visibility: hidden; transition: 0.3s; }
-        .toast.show { opacity: 1; visibility: visible; top: 30px; }
+        .toast.show { opacity: 1; visibility: visible; top: calc(30px + env(safe-area-inset-top)); }
         .toast.error { background: var(--danger); color: white; }
         .toast.success { background: var(--success); color: white; }
         
-        .screen { flex: 1; overflow-y: auto; padding: 20px; padding-bottom: 120px; display: none; }
+        .screen { flex: 1; overflow-y: auto; padding: 20px; padding-top: calc(20px + env(safe-area-inset-top)); padding-bottom: calc(120px + env(safe-area-inset-bottom)); display: none; }
         .screen.active { display: block; animation: fadeIn 0.2s ease; }
         .screen.auth-screen { padding-bottom: 20px; display: none; background: var(--bg-main); flex-direction: column; justify-content: center; height: 100%; }
         .screen.auth-screen.active { display: flex; }
@@ -180,7 +182,7 @@
         .modal-content { background: var(--bg-main); width: 90%; max-height: 90vh; overflow-y:auto; padding: 20px; border-radius: 16px; border: 1px solid var(--border); position: relative;}
         .close-modal { position: absolute; top: 12px; right: 12px; color: var(--text-muted); font-size: 18px; cursor:pointer; width: 24px; height: 24px; display: flex; align-items: center; justify-content: center;}
         
-        .bottom-nav { position: absolute; bottom: 0; width: 100%; background: var(--bg-surface); display: flex; justify-content: space-around; padding: 10px 0 calc(15px + env(safe-area-inset-bottom)); border-top: 1px solid var(--border); display: none;}
+        .bottom-nav { position: absolute; bottom: 0; width: 100%; background: var(--bg-surface); display: flex; justify-content: space-around; padding: 10px 0 calc(10px + env(safe-area-inset-bottom)); border-top: 1px solid var(--border); display: none;}
         .bottom-nav.active { display: flex; }
         .nav-item { display: flex; flex-direction: column; align-items: center; gap: 4px; color: var(--text-muted); cursor: pointer; font-size: 10px; font-weight: 500; transition: color 0.2s; }
         .nav-item.active { color: var(--primary); }
@@ -492,11 +494,16 @@
         <header><div class="greeting"><h1>Переводы</h1></div></header>
         <div style="background:var(--bg-surface); padding:20px; border-radius:12px; border:1px solid var(--border);">
             <div class="form-group"><label>Ваша карта</label><input type="text" id="from-card-input" disabled style="opacity:0.7;"></div>
-            <div class="form-group"><label>Номер карты получателя</label><input type="text" id="transfer-card" placeholder="0000 0000 0000 0000" maxlength="19" oninput="checkTransferForm()"></div>
+            <div class="form-group"><label>Номер карты получателя</label><input type="text" id="transfer-card" placeholder="0000 0000 0000 0000" oninput="formatCard(this)"></div>
             <div class="form-group">
                 <label>Сумма перевода ($) <span style="color:var(--text-muted); float:right;">Комиссия 3%</span></label>
                 <input type="number" id="transfer-amount" placeholder="0.00" oninput="checkTransferForm()">
                 <div id="transfer-fee-display" style="font-size:11px; color:var(--text-muted); margin-top:4px; text-align:right;">К списанию: 0.00 $</div>
+            </div>
+            <div class="form-group" style="margin-top: 15px;">
+                <label>Подтверждение (PIN-код карты)</label>
+                <input type="password" id="transfer-pin" placeholder="****" maxlength="4" inputmode="numeric" oninput="checkTransferForm()" style="letter-spacing: 5px; text-align:center; font-weight:bold;">
+                <div style="font-size:11px; color:var(--text-muted); margin-top:4px; text-align:center;">Посмотреть PIN можно на обратной стороне карты</div>
             </div>
             <button type="button" class="btn-main btn-primary" id="btn-transfer" disabled onclick="executeTransfer()">Отправить средства</button>
         </div>
@@ -506,7 +513,7 @@
         <header><div class="greeting"><p>Оценка портфеля</p><h1 id="portfolio-total">0.00 $</h1></div></header>
         <div class="tabs-header">
             <div class="tab-btn active" onclick="setMarketTab('stocks', this)">Акции</div>
-            <div class="tab-btn" onclick="setMarketTab('crypto', this)">Крипта</div>
+            <div class="tab-btn" onclick="setMarketTab('crypto', this)">Crypta</div>
             <div class="tab-btn" onclick="setMarketTab('news', this)">Новости</div>
         </div>
         <div id="stocks-container"></div>
@@ -623,15 +630,23 @@
                 <div style="font-weight: 600; font-size:14px;">Статус карты</div>
                 <div id="vip-status-display" style="font-size:12px; font-weight:bold; color:var(--text-muted);">STANDARD</div>
             </div>
-            <p style="font-size:12px; color:var(--text-muted); margin-bottom:15px;" id="vip-next-desc">Следующий: SILVER (5 000 000 000 $)</p>
-            <button class="btn-main" id="btn-buy-vip" onclick="upgradeVip()">Повысить статус</button>
+            <p style="font-size:12px; color:var(--text-muted); margin-bottom:10px;" id="vip-next-desc">Следующий: SILVER (5 000 000 000 $)</p>
+            <div style="display:flex; gap:10px;">
+                <input type="password" id="vip-cvv" placeholder="CVV" maxlength="3" inputmode="numeric" style="width: 80px; padding: 14px; border-radius: 8px; border: 1px solid var(--border); background: var(--bg-main); color: white; text-align: center; outline:none;" onfocus="this.style.borderColor='var(--primary)'" onblur="this.style.borderColor='var(--border)'">
+                <button class="btn-main" id="btn-buy-vip" style="flex:1;" onclick="upgradeVip()">Повысить статус</button>
+            </div>
+            <p style="font-size:11px; color:var(--text-muted); margin-top:8px;">Для подтверждения покупки введите CVV-код с карты</p>
         </div>
 
         <div style="background: var(--bg-surface); border-radius: 12px; padding: 20px; margin-bottom: 15px; border:1px solid var(--border);">
             <div style="font-weight: 600; margin-bottom: 8px; font-size:14px;">Уникальный номер карты</div>
-            <p style="font-size:12px; color:var(--text-muted); margin-bottom:15px;">Создайте свой номер из 16 цифр. Стоимость: 500 000 $</p>
-            <div class="form-group"><input type="number" id="custom-card-input" placeholder="0000 0000 0000 0000"></div>
-            <button class="btn-main" onclick="buyCustomCard()">Приобрести номер</button>
+            <p style="font-size:12px; color:var(--text-muted); margin-bottom:10px;">Создайте свой номер из 16 цифр. Стоимость: 500 000 $</p>
+            <div class="form-group" style="margin-bottom:10px;"><input type="number" id="custom-card-input" placeholder="0000 0000 0000 0000"></div>
+            <div style="display:flex; gap:10px;">
+                <input type="password" id="custom-card-cvv" placeholder="CVV" maxlength="3" inputmode="numeric" style="width: 80px; padding: 14px; border-radius: 8px; border: 1px solid var(--border); background: var(--bg-main); color: white; text-align: center; outline:none;" onfocus="this.style.borderColor='var(--primary)'" onblur="this.style.borderColor='var(--border)'">
+                <button class="btn-main" style="flex:1;" onclick="buyCustomCard()">Приобрести</button>
+            </div>
+            <p style="font-size:11px; color:var(--text-muted); margin-top:8px;">Требуется CVV-код для безопасности</p>
         </div>
 
         <div style="background: var(--bg-surface); border-radius: 12px; padding: 20px; margin-bottom: 15px; text-align:center; border:1px solid var(--border);">
@@ -970,7 +985,7 @@
     const skinsConfig = [
         { id: 'default', name: 'Темная (Стандарт)', price: 0, style: 'background:#0D1117; border-color:#30363D;' },
         { id: 'skin-gold', name: 'Золотая', price: 50000, style: 'background:linear-gradient(135deg, #FFD700, #B8860B); color:#000;' },
-        { id: 'skin-neon', name: 'Неоновая', price: 100000, style: 'background:#000; color:#0f0; border:1px solid #0f0;' },
+        { id: 'skin-neon', name: 'Неоновая', price: 100000, style: 'background:#000; color:#0f0; box-shadow: 0 0 15px #0f0; border:1px solid #0f0;' },
         { id: 'skin-glass', name: 'Стеклянная', price: 250000, style: 'background:rgba(255,255,255,0.05); color:#fff; backdrop-filter: blur(15px); border:1px solid rgba(255,255,255,0.2);' },
         { id: 'skin-fire', name: '🔥 Огненная', price: 1000000, style: 'background:linear-gradient(270deg, #8b0000, #ff4500); color:#fff; animation: fireAnim 3s infinite;' },
         { id: 'skin-matrix', name: '💻 Матрица', price: 2500000, style: 'background:#000; color:#0f0;' },
@@ -994,11 +1009,7 @@
     window.completeRegistration = function() {
         const name = document.getElementById('reg-name').value.trim(); const pass = document.getElementById('reg-pass').value; const appPin = document.getElementById('reg-app-pin').value; const emailKey = tempRegEmail.replace(/\./g, ',');
         
-        // ВАЛИДАЦИЯ ПРИ РЕГИСТРАЦИИ
-        if(!name || pass.length < 4 || appPin.length !== 4) { 
-            showToast("Заполните корректно все данные", "error"); 
-            return; 
-        }
+        if(!name || pass.length < 4 || appPin.length !== 4) { showToast("Заполните корректно все данные", "error"); return; }
 
         const newUser = { name: name, password: pass, appPin: appPin, uid: generateRandomNum(8), vip: {level: 0, name: 'STANDARD'}, balance: 0.00, energy: 100, cardNumber: generateRandomNum(16), pin: generateRandomNum(4), cvv: generateRandomNum(3), isLocked: false, lastTopUpTime: 0, history: [], portfolio: {}, clickTier: 0, clickPower: 0.10, clickUpgradePrice: 500, autoClicker: 0, autoUpgradePrice: 5000, skin: 'default', ownedSkins: ['default'], deposits: [], credit: {active: false}, creditScore: 100, creditLimit: calculateCreditLimit(), settings: { sounds: true, notifications: true, newsNotifications: true }, businesses: {}, quests: {}, miners: 0, hasOffshore: false, smuggling: {active: false}, wantedLevel: 0, raidScheduledLevel: 0, nextRaidTime: null };
         database.ref('users/' + emailKey).set(newUser).then(() => { db.users[emailKey] = newUser; currentUserKey = emailKey; try { localStorage.setItem('DBank_User_Key', currentUserKey); } catch(e) {} showToast("Аккаунт создан!", "success"); startApp(); });
@@ -1008,10 +1019,7 @@
         const email = document.getElementById('login-email').value.trim().toLowerCase(); const pass = document.getElementById('login-pass').value; const emailKey = email.replace(/\./g, ',');
         database.ref('users/' + emailKey).once('value').then((snapshot) => {
             if(snapshot.exists() && snapshot.val().password === pass) {
-                if(snapshot.val().isBanned) {
-                    document.body.innerHTML = "<div style='color:var(--danger); text-align:center; margin-top:40vh; font-size:24px; font-weight:bold;'>АККАУНТ ЗАБЛОКИРОВАН</div>";
-                    setTimeout(logout, 3000); return; 
-                }
+                if(snapshot.val().isBanned) { document.body.innerHTML = "<div style='color:var(--danger); text-align:center; margin-top:40vh; font-size:24px; font-weight:bold;'>АККАУНТ ЗАБЛОКИРОВАН</div>"; setTimeout(logout, 3000); return; }
                 db.users[emailKey] = snapshot.val(); currentUserKey = emailKey; try { localStorage.setItem('DBank_User_Key', currentUserKey); } catch(e) {} showAppPinScreen();
             } else { showToast("Неверная почта или пароль", "error"); }
         });
@@ -1021,10 +1029,7 @@
         if(currentUserKey) {
             database.ref('users/' + currentUserKey).once('value').then((snapshot) => {
                 if(snapshot.exists()) {
-                    if(snapshot.val().isBanned) {
-                        document.body.innerHTML = "<div style='color:var(--danger); text-align:center; margin-top:40vh; font-size:24px; font-weight:bold;'>АККАУНТ ЗАБЛОКИРОВАН</div>";
-                        logout(); return; 
-                    } 
+                    if(snapshot.val().isBanned) { document.body.innerHTML = "<div style='color:var(--danger); text-align:center; margin-top:40vh; font-size:24px; font-weight:bold;'>АККАУНТ ЗАБЛОКИРОВАН</div>"; logout(); return; } 
                     db.users[currentUserKey] = snapshot.val(); showAppPinScreen(); 
                 } else logout();
             }).catch(() => { if(db.users[currentUserKey] && !db.users[currentUserKey].isBanned) showAppPinScreen(); else switchAuthScreen('screen-login'); });
@@ -1032,7 +1037,6 @@
     }
     
     window.logout = function() { if(currentUserKey) database.ref('users/' + currentUserKey).off('value'); window.dbListenerAttached = false; currentUserKey = null; try { localStorage.removeItem('DBank_User_Key'); } catch(e) {} document.getElementById('main-nav').classList.remove('active'); document.querySelectorAll('.screen').forEach(s => s.classList.remove('active')); switchAuthScreen('screen-login'); }
-    
     window.deleteAccount = function() { if(!deleteConfirm) { showToast("Нажмите еще раз для подтверждения удаления", "error"); deleteConfirm = true; setTimeout(() => deleteConfirm = false, 3000); return; } database.ref('users/' + currentUserKey).remove(); delete db.users[currentUserKey]; logout(); deleteConfirm = false; }
 
     window.showAppPinScreen = function() { document.querySelectorAll('.auth-screen, .screen').forEach(s => s.classList.remove('active')); currentPinInput = ""; updatePinDots(); document.getElementById('screen-app-pin').classList.add('active'); document.getElementById('pin-name').innerText = getState()?.name || "Профиль"; }
@@ -1063,17 +1067,11 @@
         document.getElementById('main-nav').classList.add('active');
         
         if (user.isBanned) { document.body.innerHTML = "<div style='color:var(--danger); text-align:center; margin-top:40vh; font-size:24px; font-weight:bold;'>АККАУНТ ЗАБЛОКИРОВАН</div>"; logout(); return; }
-        
         if (user.clickPower > 5.00) { user.clickPower = 5.00; user.clickTier = clickTiers.length - 1; } if (user.autoClicker > 3.00) { user.autoClicker = 3.00; } checkQuests(); saveDB();
 
         if(!window.dbListenerAttached) {
             window.dbListenerAttached = true;
-            database.ref('users/' + currentUserKey + '/isBanned').on('value', snap => {
-                if(snap.exists() && snap.val() === true) { 
-                    logout();
-                    document.body.innerHTML = "<div style='color:var(--danger); text-align:center; margin-top:40vh; font-size:24px; font-weight:bold;'>АККАУНТ ЗАБЛОКИРОВАН</div>";
-                }
-            });
+            database.ref('users/' + currentUserKey + '/isBanned').on('value', snap => { if(snap.exists() && snap.val() === true) { logout(); document.body.innerHTML = "<div style='color:var(--danger); text-align:center; margin-top:40vh; font-size:24px; font-weight:bold;'>АККАУНТ ЗАБЛОКИРОВАН</div>"; } });
 
             database.ref('users/' + currentUserKey + '/incoming_transfers').on('child_added', snap => {
                 let tx = snap.val(); let u = db.users[currentUserKey];
@@ -1081,13 +1079,8 @@
                 u.history.unshift({ icon: '💸', title: `Перевод от ${tx.senderName}`, date: tx.date, amount: tx.amount, type: 'plus', cardNum: tx.senderCard });
                 showPush("Поступление средств", `Зачислено ${tx.amount} $`, "💸");
                 playSound('default'); 
-                
-                if(u.incoming_transfers && u.incoming_transfers[snap.key]) {
-                    delete u.incoming_transfers[snap.key];
-                }
-                
-                saveDB(); 
-                updateBalanceDisplayQuiet();
+                if(u.incoming_transfers && u.incoming_transfers[snap.key]) { delete u.incoming_transfers[snap.key]; }
+                saveDB(); updateBalanceDisplayQuiet();
                 if(document.getElementById('screen-dashboard').classList.contains('active')) renderHistory();
                 snap.ref.remove();
             });
@@ -1104,8 +1097,7 @@
         document.getElementById('set-notifs').checked = user.settings.notifications;
         document.getElementById('set-news').checked = user.settings.newsNotifications;
 
-        renderVip();
-        applySkin(user.skin); applyLockStatusVisually(); updateBalanceDisplayQuiet(); renderHistory(); renderQuests(); 
+        renderVip(); applySkin(user.skin); applyLockStatusVisually(); updateBalanceDisplayQuiet(); renderHistory(); renderQuests(); 
         document.getElementById('screen-dashboard').classList.add('active');
         document.getElementById('nav-item-home').classList.add('active');
     }
@@ -1116,17 +1108,8 @@
     window.closeModal = function(event, id) { if(event.target.id === id) document.getElementById(id).classList.remove('active'); }
 
     // АДМИНКА
-    window.banUser = function(targetKey) { 
-        if(currentUserKey !== 'danildovz1@gmail,com') return; 
-        if(confirm("Заблокировать игрока?")) { database.ref('users/' + targetKey).update({ isBanned: true }).then(() => { showToast("Аккаунт заблокирован", "success"); openLeaderboard(); }); } 
-    };
-
-    window.wipeUser = function(targetKey) {
-        if(currentUserKey !== 'danildovz1@gmail,com') return;
-        if(confirm("Обнулить баланс и активы?")) {
-            database.ref('users/' + targetKey).update({ balance: 0, portfolio: {}, businesses: {}, deposits: [], credit: {active: false}, clickTier: 0, clickPower: 0.10, autoClicker: 0, miners: 0, hasOffshore: false, smuggling: {active: false}, wantedLevel: 0, raidScheduledLevel: 0, nextRaidTime: null }).then(() => { showToast("Аккаунт обнулен", "success"); openLeaderboard(); });
-        }
-    };
+    window.banUser = function(targetKey) { if(currentUserKey !== 'danildovz1@gmail,com') return; if(confirm("Заблокировать игрока?")) { database.ref('users/' + targetKey).update({ isBanned: true }).then(() => { showToast("Аккаунт заблокирован", "success"); openLeaderboard(); }); } };
+    window.wipeUser = function(targetKey) { if(currentUserKey !== 'danildovz1@gmail,com') return; if(confirm("Обнулить баланс и активы?")) { database.ref('users/' + targetKey).update({ balance: 0, portfolio: {}, businesses: {}, deposits: [], credit: {active: false}, clickTier: 0, clickPower: 0.10, autoClicker: 0, miners: 0, hasOffshore: false, smuggling: {active: false}, wantedLevel: 0, raidScheduledLevel: 0, nextRaidTime: null }).then(() => { showToast("Аккаунт обнулен", "success"); openLeaderboard(); }); } };
 
     window.openLeaderboard = function() {
         switchTab('screen-leaderboard', null); document.getElementById('leaderboard-container').innerHTML = '<div style="text-align:center; margin-top:20px; color:var(--text-muted);">Загрузка базы...</div>';
@@ -1152,42 +1135,22 @@
 
     // VIP SYSTEM
     function renderVip() {
-        const user = getState();
-        if(!user) return;
-        let currentLevel = user.vip?.level || 0;
-        let currentTier = vipTiers[currentLevel] || vipTiers[0];
-        let nextTier = vipTiers[currentLevel + 1];
-        
-        document.getElementById('vip-status-display').innerText = currentTier.name;
-        document.getElementById('vip-status-display').style.color = currentTier.color;
-        
-        document.getElementById('card-tier-text').innerText = currentTier.name;
-        document.getElementById('card-tier-text-main').innerText = currentTier.name;
-
-        if(nextTier) {
-            document.getElementById('vip-next-desc').innerText = `Следующий: ${nextTier.name} (${nextTier.price.toLocaleString('ru-RU')} $)`;
-            document.getElementById('btn-buy-vip').innerText = `Купить ${nextTier.name}`;
-            document.getElementById('btn-buy-vip').disabled = false;
-        } else {
-            document.getElementById('vip-next-desc').innerText = `Максимальный статус достигнут.`;
-            document.getElementById('btn-buy-vip').innerText = `MAX TIER`;
-            document.getElementById('btn-buy-vip').disabled = true;
-        }
+        const user = getState(); if(!user) return;
+        let currentLevel = user.vip?.level || 0; let currentTier = vipTiers[currentLevel] || vipTiers[0]; let nextTier = vipTiers[currentLevel + 1];
+        document.getElementById('vip-status-display').innerText = currentTier.name; document.getElementById('vip-status-display').style.color = currentTier.color;
+        document.getElementById('card-tier-text').innerText = currentTier.name; document.getElementById('card-tier-text-main').innerText = currentTier.name;
+        if(nextTier) { document.getElementById('vip-next-desc').innerText = `Следующий: ${nextTier.name} (${nextTier.price.toLocaleString('ru-RU')} $)`; document.getElementById('btn-buy-vip').innerText = `Купить ${nextTier.name}`; document.getElementById('btn-buy-vip').disabled = false; document.getElementById('vip-cvv').style.display = 'block'; } else { document.getElementById('vip-next-desc').innerText = `Максимальный статус достигнут.`; document.getElementById('btn-buy-vip').innerText = `MAX TIER`; document.getElementById('btn-buy-vip').disabled = true; document.getElementById('vip-cvv').style.display = 'none'; }
     }
 
     window.upgradeVip = function() {
-        const user = getState();
-        let currentLevel = user.vip?.level || 0;
-        let nextTier = vipTiers[currentLevel + 1];
-        if(!nextTier) return;
-        
+        const user = getState(); let currentLevel = user.vip?.level || 0; let nextTier = vipTiers[currentLevel + 1]; if(!nextTier) return;
+        const cvvInput = document.getElementById('vip-cvv').value; if(cvvInput !== user.cvv) { showToast("Неверный CVV-код", "error"); return; }
         if(user.balance < nextTier.price && currentUserKey !== 'danildovz1@gmail,com') { showToast(`Необходимо ${nextTier.price.toLocaleString('ru-RU')} $`, "error"); return; }
         
         if (currentUserKey !== 'danildovz1@gmail,com') user.balance -= nextTier.price;
         user.vip = { level: nextTier.level, name: nextTier.name };
-        saveDB(); updateBalanceDisplayQuiet(); renderVip();
-        showToast(`Статус повышен до ${nextTier.name}!`, "success");
-        showSuccessEffect();
+        saveDB(); updateBalanceDisplayQuiet(); renderVip(); document.getElementById('vip-cvv').value = '';
+        showToast(`Статус повышен до ${nextTier.name}!`, "success"); showSuccessEffect();
     };
 
     window.toggleSetting = function(settingName) { const user = getState(); if(settingName === 'sounds') user.settings.sounds = document.getElementById('set-sounds').checked; if(settingName === 'notifications') user.settings.notifications = document.getElementById('set-notifs').checked; if(settingName === 'newsNotifications') user.settings.newsNotifications = document.getElementById('set-news').checked; saveDB(); }
@@ -1201,7 +1164,7 @@
             container.innerHTML = ''; 
             if(currentMarketTab === 'news') { 
                 if(globalNews.length === 0) { container.innerHTML = '<div style="text-align:center; color:var(--text-muted); margin-top:20px; font-size:13px;">Событий пока нет.</div>'; return; } 
-                globalNews.forEach(n => { container.innerHTML += `<div class="stock-item" style="border-left: 3px solid ${n.isGood ? 'var(--success)' : 'var(--danger)'};"><div style="font-size:24px; width:40px; text-align:center;">${n.icon}</div><div style="flex:1;"><b>${n.title}</b><br><span style="color:var(--text-muted); font-size:11px;">${n.text}</span></div><div style="font-size:10px; color:var(--text-muted);">${n.time}</div></div>`; }); return; 
+                globalNews.forEach(n => { container.innerHTML += `<div class="stock-item" style="border-left: 3px solid ${n.isGood ? 'var(--success)' : 'var(--danger)'};"><div style="font-size:24px; width:40px; text-align:center;">${n.icon}</div><div style="flex:1;"><b>${n.title}</b><br><span style="font-size:11px;">${n.text}</span></div><div style="font-size:10px; color:var(--text-muted);">${n.time}</div></div>`; }); return; 
             } 
             let totalPortfolioValue = 0; const marketData = currentMarketTab === 'stocks' ? stocksMarket : cryptoMarket; 
             marketData.forEach(s => { 
@@ -1239,7 +1202,7 @@
         svg.innerHTML = html; 
     }
 
-    window.updateStockCalc = function() { const qty = parseFloat(document.getElementById('stock-qty').value) || 0; const stock = [...stocksMarket, ...cryptoMarket].find(s => s.id === currentStockId); document.getElementById('stock-calc-total').innerText = `Сумма операции: ${(qty * stock.hist1H[stock.hist1H.length-1]).toFixed(2)} $`; }
+    window.updateStockCalc = function() { const qty = parseFloat(document.getElementById('stock-qty').value) || 0; const stock = [...stocksMarket, ...cryptoMarket].find(s => s.id === currentStockId); document.getElementById('stock-calc-total').innerText = `Сумма: ${(qty * stock.hist1H[stock.hist1H.length-1]).toFixed(2)} $`; }
     
     window.executeBuyStock = function() {
         const qtyStr = document.getElementById('stock-qty').value; const qty = parseFloat(qtyStr); const minQty = currentMarketTab === 'crypto' ? 0.01 : 0.1; if(!qty || qty < minQty) { showToast(`Минимальный объем ${minQty}`, "error"); return; } 
@@ -1270,11 +1233,8 @@
         progressQuest('casino');
         if (color === resultColor) { 
             let win = color === 'green' ? bet * 14 : bet * 2; user.balance += win; 
-            addTransaction("Рулетка (Выигрыш)", win - bet, '🎰'); showPush("Казино", `Победа! Выпало ${resultColor}. +${win} $`, "🎰"); 
-            showSuccessEffect();
-        } else { 
-            addTransaction("Рулетка (Поражение)", -bet, '🎰'); showPush("Казино", `Проигрыш. Выпало ${resultColor}.`, "🎰", true); 
-        }
+            addTransaction("Рулетка (Выигрыш)", win - bet, '🎰'); showPush("Казино", `Победа! Выпало ${resultColor}. +${win} $`, "🎰"); showSuccessEffect();
+        } else { addTransaction("Рулетка (Поражение)", -bet, '🎰'); showPush("Казино", `Проигрыш. Выпало ${resultColor}.`, "🎰", true); }
         saveDB(); updateBalanceDisplayQuiet(); document.getElementById('casino-modal').classList.remove('active');
     };
 
@@ -1283,50 +1243,25 @@
         if(user.balance < cost && currentUserKey !== 'danildovz1@gmail,com') { showToast("Недостаточно средств", "error"); return; }
         if (currentUserKey !== 'danildovz1@gmail,com') user.balance -= cost;
         const roll = Math.random();
-        if(roll < 0.95) {
-            addTransaction("Лотерея (Пусто)", -cost, '🎟'); showPush("Лотерея", "Без выигрыша. Попробуйте снова.", "🗑️");
-        } else if(roll < 0.99) {
-            let win = cost * 2; user.balance += win; addTransaction("Лотерея (Победа)", win - cost, '🎟'); showPush("Лотерея", `Успех! Выигрыш: ${win} $`, "💵"); showSuccessEffect();
-        } else if(roll < 0.999) {
-            let win = cost * 10; user.balance += win; addTransaction("Лотерея (Крупно)", win - cost, '🎟'); showPush("Лотерея", `Отлично! Выигрыш: ${win} $`, "💰"); showSuccessEffect();
-        } else {
-            let win = cost * 50; user.balance += win; addTransaction("Лотерея (ДЖЕКПОТ)", win - cost, '🎟'); showPush("Лотерея", `ДЖЕКПОТ! Выигрыш ${win} $`, "💎"); showSuccessEffect();
-        }
+        if(roll < 0.95) { addTransaction("Лотерея (Пусто)", -cost, '🎟'); showPush("Лотерея", "Без выигрыша. Попробуйте снова.", "🗑️");
+        } else if(roll < 0.99) { let win = cost * 2; user.balance += win; addTransaction("Лотерея (Победа)", win - cost, '🎟'); showPush("Лотерея", `Успех! Выигрыш: ${win} $`, "💵"); showSuccessEffect();
+        } else if(roll < 0.999) { let win = cost * 10; user.balance += win; addTransaction("Лотерея (Крупно)", win - cost, '🎟'); showPush("Лотерея", `Отлично! Выигрыш: ${win} $`, "💰"); showSuccessEffect();
+        } else { let win = cost * 50; user.balance += win; addTransaction("Лотерея (ДЖЕКПОТ)", win - cost, '🎟'); showPush("Лотерея", `ДЖЕКПОТ! Выигрыш ${win} $`, "💎"); showSuccessEffect(); }
         saveDB(); updateBalanceDisplayQuiet(); document.getElementById('casino-modal').classList.remove('active');
     };
 
     // --- ЛОББИ КНБ ---
-    window.openRpsLobby = function() {
-        document.getElementById('rps-modal').classList.add('active');
-        document.getElementById('rps-lobby-view').style.display = 'block';
-        document.getElementById('rps-game-view').style.display = 'none';
-        loadRpsLobby();
-    };
-
-    window.closeRpsModal = function() {
-        document.getElementById('rps-modal').classList.remove('active');
-        if(rpsListener) { database.ref('rps_rooms').off('value', rpsListener); rpsListener = null; }
-        if(rpsCurrentRoomId) { leaveRpsGame(); }
-    };
+    window.openRpsLobby = function() { document.getElementById('rps-modal').classList.add('active'); document.getElementById('rps-lobby-view').style.display = 'block'; document.getElementById('rps-game-view').style.display = 'none'; loadRpsLobby(); };
+    window.closeRpsModal = function() { document.getElementById('rps-modal').classList.remove('active'); if(rpsListener) { database.ref('rps_rooms').off('value', rpsListener); rpsListener = null; } if(rpsCurrentRoomId) { leaveRpsGame(); } };
 
     function loadRpsLobby() {
         if(rpsListener) database.ref('rps_rooms').off('value', rpsListener);
         rpsListener = database.ref('rps_rooms').on('value', snap => {
-            let rooms = snap.val() || {};
-            let html = '';
+            let rooms = snap.val() || {}; let html = '';
             for(let id in rooms) {
                 if(rooms[id].status === 'waiting') {
                     let isMine = rooms[id].p1 === currentUserKey;
-                    html += `<div class="rps-room-item">
-                        <div>
-                            <div style="font-size:12px; color:var(--text-muted);">Создатель: ${rooms[id].creatorName}</div>
-                            <div style="font-size:15px; font-weight:600; color:var(--text-dark);">${rooms[id].bet} $</div>
-                        </div>
-                        ${isMine 
-                            ? `<button class="btn-main btn-danger" style="width:auto; padding:8px 14px; font-size:12px;" onclick="cancelRpsGame('${id}')">Отозвать</button>`
-                            : `<button class="btn-main btn-primary" style="width:auto; padding:8px 14px; font-size:12px;" onclick="joinRpsGame('${id}', ${rooms[id].bet})">Войти</button>`
-                        }
-                    </div>`;
+                    html += `<div class="rps-room-item"><div><div style="font-size:12px; color:var(--text-muted);">Создатель: ${rooms[id].creatorName}</div><div style="font-size:15px; font-weight:600; color:var(--text-dark);">${rooms[id].bet} $</div></div>${isMine ? `<button class="btn-main btn-danger" style="width:auto; padding:8px 14px; font-size:12px;" onclick="cancelRpsGame('${id}')">Отозвать</button>` : `<button class="btn-main btn-primary" style="width:auto; padding:8px 14px; font-size:12px;" onclick="joinRpsGame('${id}', ${rooms[id].bet})">Войти</button>`}</div>`;
                 }
             }
             document.getElementById('rps-games-list').innerHTML = html || '<div style="color:var(--text-muted); font-size:13px; text-align:center; margin-top:10px;">Доступных игр нет. Создайте свою.</div>';
@@ -1334,162 +1269,71 @@
     }
 
     window.createRpsGame = function() {
-        const bet = parseFloat(document.getElementById('rps-bet').value);
-        const user = getState();
+        const bet = parseFloat(document.getElementById('rps-bet').value); const user = getState();
         if(bet < 10 || (!bet) || (bet > user.balance && currentUserKey !== 'danildovz1@gmail,com')) { showToast("Некорректная сумма ставки", "error"); return; }
-        
-        if (currentUserKey !== 'danildovz1@gmail,com') user.balance -= bet; 
-        saveDB(); updateBalanceDisplayQuiet();
-        let newRoom = database.ref('rps_rooms').push();
-        rpsCurrentRoomId = newRoom.key;
-        newRoom.set({ status: 'waiting', bet: bet, p1: currentUserKey, creatorName: user.name, createdAt: Date.now() });
-        
-        enterRpsGameView(bet);
-        listenToCurrentGame();
+        if (currentUserKey !== 'danildovz1@gmail,com') user.balance -= bet; saveDB(); updateBalanceDisplayQuiet();
+        let newRoom = database.ref('rps_rooms').push(); rpsCurrentRoomId = newRoom.key; newRoom.set({ status: 'waiting', bet: bet, p1: currentUserKey, creatorName: user.name, createdAt: Date.now() });
+        enterRpsGameView(bet); listenToCurrentGame();
     };
 
     window.joinRpsGame = function(roomId, bet) {
         const user = getState();
         if(user.balance < bet && currentUserKey !== 'danildovz1@gmail,com') { showToast("Недостаточно средств", "error"); return; }
-        if (currentUserKey !== 'danildovz1@gmail,com') user.balance -= bet; 
-        saveDB(); updateBalanceDisplayQuiet();
-        
-        rpsCurrentRoomId = roomId;
-        database.ref('rps_rooms/' + roomId).update({ p2: currentUserKey, status: 'playing' });
-        enterRpsGameView(bet);
-        listenToCurrentGame();
+        if (currentUserKey !== 'danildovz1@gmail,com') user.balance -= bet; saveDB(); updateBalanceDisplayQuiet();
+        rpsCurrentRoomId = roomId; database.ref('rps_rooms/' + roomId).update({ p2: currentUserKey, status: 'playing' });
+        enterRpsGameView(bet); listenToCurrentGame();
     };
 
     window.cancelRpsGame = function(roomId) {
         const user = getState();
-        database.ref('rps_rooms/' + roomId).once('value').then(snap => {
-            let r = snap.val();
-            if(r && r.p1 === currentUserKey && r.status === 'waiting') {
-                user.balance += r.bet; saveDB(); updateBalanceDisplayQuiet();
-                database.ref('rps_rooms/' + roomId).remove().then(() => {
-                    if (rpsCurrentRoomId === roomId) { rpsCurrentRoomId = null; }
-                    showToast("Партия отменена", "info");
-                    document.getElementById('rps-lobby-view').style.display = 'block';
-                    document.getElementById('rps-game-view').style.display = 'none';
-                });
-            }
-        });
+        database.ref('rps_rooms/' + roomId).once('value').then(snap => { let r = snap.val(); if(r && r.p1 === currentUserKey && r.status === 'waiting') { user.balance += r.bet; saveDB(); updateBalanceDisplayQuiet(); database.ref('rps_rooms/' + roomId).remove().then(() => { if (rpsCurrentRoomId === roomId) { rpsCurrentRoomId = null; } showToast("Партия отменена", "info"); document.getElementById('rps-lobby-view').style.display = 'block'; document.getElementById('rps-game-view').style.display = 'none'; }); } });
     };
 
-    function enterRpsGameView(bet) {
-        document.getElementById('rps-lobby-view').style.display = 'none';
-        document.getElementById('rps-game-view').style.display = 'block';
-        document.getElementById('rps-game-bet').innerText = bet;
-        document.getElementById('rps-game-status').innerText = "Сделайте ваш выбор";
-        document.getElementById('rps-game-status').style.color = "var(--primary)";
-    }
+    function enterRpsGameView(bet) { document.getElementById('rps-lobby-view').style.display = 'none'; document.getElementById('rps-game-view').style.display = 'block'; document.getElementById('rps-game-bet').innerText = bet; document.getElementById('rps-game-status').innerText = "Сделайте ваш выбор"; document.getElementById('rps-game-status').style.color = "var(--primary)"; }
 
     window.makeRpsMove = function(move) {
         if(!rpsCurrentRoomId) return;
-        document.getElementById('rps-game-status').innerText = "Ожидание хода соперника...";
-        document.getElementById('rps-game-status').style.color = "var(--text-muted)";
-        
-        database.ref('rps_rooms/' + rpsCurrentRoomId).once('value').then(snap => {
-            let r = snap.val();
-            if(!r) return;
-            if(r.p1 === currentUserKey) database.ref('rps_rooms/' + rpsCurrentRoomId).update({ p1Move: move });
-            else if(r.p2 === currentUserKey) database.ref('rps_rooms/' + rpsCurrentRoomId).update({ p2Move: move });
-        });
+        document.getElementById('rps-game-status').innerText = "Ожидание хода соперника..."; document.getElementById('rps-game-status').style.color = "var(--text-muted)";
+        database.ref('rps_rooms/' + rpsCurrentRoomId).once('value').then(snap => { let r = snap.val(); if(!r) return; if(r.p1 === currentUserKey) database.ref('rps_rooms/' + rpsCurrentRoomId).update({ p1Move: move }); else if(r.p2 === currentUserKey) database.ref('rps_rooms/' + rpsCurrentRoomId).update({ p2Move: move }); });
     };
 
     function listenToCurrentGame() {
         database.ref('rps_rooms/' + rpsCurrentRoomId).on('value', snap => {
             let r = snap.val();
-            if(!r) { 
-                if(document.getElementById('rps-modal').classList.contains('active')) {
-                    document.getElementById('rps-lobby-view').style.display = 'block';
-                    document.getElementById('rps-game-view').style.display = 'none';
-                    rpsCurrentRoomId = null;
-                }
-                return; 
-            }
+            if(!r) { if(document.getElementById('rps-modal').classList.contains('active')) { document.getElementById('rps-lobby-view').style.display = 'block'; document.getElementById('rps-game-view').style.display = 'none'; rpsCurrentRoomId = null; } return; }
             if(r.p1Move && r.p2Move && r.status !== 'finished') {
-                let winner = 0;
-                if(r.p1Move === r.p2Move) winner = 0;
-                else if((r.p1Move==='rock'&&r.p2Move==='scissors') || (r.p1Move==='paper'&&r.p2Move==='rock') || (r.p1Move==='scissors'&&r.p2Move==='paper')) winner = 1;
-                else winner = 2;
-                
-                database.ref('rps_rooms/' + rpsCurrentRoomId).update({ status: 'finished', winner: winner });
-                progressQuest('casino');
-                
-                const user = getState();
-                let amI_P1 = r.p1 === currentUserKey;
-                let myWin = (amI_P1 && winner === 1) || (!amI_P1 && winner === 2);
-                let tie = winner === 0;
-
-                setTimeout(() => {
-                    if(tie) {
-                        user.balance += r.bet; addTransaction("КНБ (Ничья)", 0, '✌️'); showToast("Ничья", "info");
-                    } else if(myWin) {
-                        let winAmt = r.bet * 2; user.balance += winAmt; addTransaction("КНБ (Победа)", winAmt - r.bet, '✌️'); showToast("Вы победили!", "success"); showSuccessEffect();
-                    } else {
-                        addTransaction("КНБ (Поражение)", -r.bet, '✌️'); showToast("Вы проиграли", "error");
-                    }
-                    saveDB(); updateBalanceDisplayQuiet();
-                    database.ref('rps_rooms/' + rpsCurrentRoomId).remove();
-                    closeRpsModal();
-                }, 1000);
+                let winner = 0; if(r.p1Move === r.p2Move) winner = 0; else if((r.p1Move==='rock'&&r.p2Move==='scissors') || (r.p1Move==='paper'&&r.p2Move==='rock') || (r.p1Move==='scissors'&&r.p2Move==='paper')) winner = 1; else winner = 2;
+                database.ref('rps_rooms/' + rpsCurrentRoomId).update({ status: 'finished', winner: winner }); progressQuest('casino');
+                const user = getState(); let amI_P1 = r.p1 === currentUserKey; let myWin = (amI_P1 && winner === 1) || (!amI_P1 && winner === 2); let tie = winner === 0;
+                setTimeout(() => { if(tie) { user.balance += r.bet; addTransaction("КНБ (Ничья)", 0, '✌️'); showToast("Ничья", "info"); } else if(myWin) { let winAmt = r.bet * 2; user.balance += winAmt; addTransaction("КНБ (Победа)", winAmt - r.bet, '✌️'); showToast("Вы победили!", "success"); showSuccessEffect(); } else { addTransaction("КНБ (Поражение)", -r.bet, '✌️'); showToast("Вы проиграли", "error"); } saveDB(); updateBalanceDisplayQuiet(); database.ref('rps_rooms/' + rpsCurrentRoomId).remove(); closeRpsModal(); }, 1000);
             }
         });
     }
 
-    window.leaveRpsGame = function() {
-        if(rpsCurrentRoomId) {
-            database.ref('rps_rooms/' + rpsCurrentRoomId).once('value').then(snap => {
-                let r = snap.val();
-                if(r && r.status === 'waiting' && r.p1 === currentUserKey) { cancelRpsGame(rpsCurrentRoomId); }
-                else { closeRpsModal(); }
-            });
-        } else {
-            closeRpsModal();
-        }
-    };
+    window.leaveRpsGame = function() { if(rpsCurrentRoomId) { database.ref('rps_rooms/' + rpsCurrentRoomId).once('value').then(snap => { let r = snap.val(); if(r && r.status === 'waiting' && r.p1 === currentUserKey) { cancelRpsGame(rpsCurrentRoomId); } else { closeRpsModal(); } }); } else { closeRpsModal(); } };
 
     window.buyDdos = function() {
         const user = getState(); if(user.balance < 50000 && currentUserKey !== 'danildovz1@gmail,com') { showToast("Недостаточно средств", "error"); return; }
         if(user.energy < 20) { showToast("Недостаточно энергии", "error"); return; }
-        if (currentUserKey !== 'danildovz1@gmail,com') user.balance -= 50000; 
-        user.energy -= 20;
-        progressQuest('ddos');
-        if(Math.random() < 0.10) { 
-            let stolen = 10000 + Math.floor(Math.random() * 90000); user.balance += stolen; 
-            addTransaction("Успешный взлом", stolen, '🏴‍☠️'); showPush("Операция", `Успех. Получено ${stolen} $`, "🏴‍☠️"); showSuccessEffect();
-        } else { 
-            user.wantedLevel = Math.min(5, (user.wantedLevel||0) + 1);
-            addTransaction("Провал операции", -50000, '🏴‍☠️'); showPush("Внимание", "Операция сорвана. Средства потеряны. Розыск повышен.", "🏴‍☠️", true); 
-        }
+        if (currentUserKey !== 'danildovz1@gmail,com') user.balance -= 50000; user.energy -= 20; progressQuest('ddos');
+        if(Math.random() < 0.10) { let stolen = 10000 + Math.floor(Math.random() * 90000); user.balance += stolen; addTransaction("Успешный взлом", stolen, '🏴‍☠️'); showPush("Операция", `Успех. Получено ${stolen} $`, "🏴‍☠️"); showSuccessEffect(); } 
+        else { user.wantedLevel = Math.min(5, (user.wantedLevel||0) + 1); addTransaction("Провал операции", -50000, '🏴‍☠️'); showPush("Внимание", "Операция сорвана. Средства потеряны. Розыск повышен.", "🏴‍☠️", true); }
         saveDB(); updateBalanceDisplayQuiet(); document.getElementById('darknet-modal').classList.remove('active');
     };
 
     window.payBribe = function() {
-        const user = getState();
-        if(!user.wantedLevel) { showToast("У вас нет штрафов", "success"); return; }
-        let cost = user.wantedLevel * 50000;
-        if(user.balance < cost && currentUserKey !== 'danildovz1@gmail,com') { showToast(`Необходимо ${cost.toLocaleString()} $`, "error"); return; }
-        if (currentUserKey !== 'danildovz1@gmail,com') user.balance -= cost;
-        user.wantedLevel = 0;
-        saveDB(); updateBalanceDisplayQuiet(); renderUsefulFull();
-        addTransaction("Оплата штрафа", -cost, '👮');
-        showToast("Вопрос урегулирован", "success");
+        const user = getState(); if(!user.wantedLevel) { showToast("У вас нет штрафов", "success"); return; }
+        let cost = user.wantedLevel * 50000; if(user.balance < cost && currentUserKey !== 'danildovz1@gmail,com') { showToast(`Необходимо ${cost.toLocaleString()} $`, "error"); return; }
+        if (currentUserKey !== 'danildovz1@gmail,com') user.balance -= cost; user.wantedLevel = 0; saveDB(); updateBalanceDisplayQuiet(); renderUsefulFull(); addTransaction("Оплата штрафа", -cost, '👮'); showToast("Вопрос урегулирован", "success");
     }
 
     window.openClansScreen = function() { const user = getState(); switchTab('screen-clans', null); if (user.clanId) { document.getElementById('clan-no-clan').style.display = 'none'; document.getElementById('clan-active').style.display = 'block'; refreshClanData(); initClanChat(user.clanId); } else { document.getElementById('clan-no-clan').style.display = 'block'; document.getElementById('clan-active').style.display = 'none'; } }
     
     window.createClan = function() { const user = getState(); if(user.balance < 10000 && currentUserKey !== 'danildovz1@gmail,com') { showToast("Недостаточно средств", "error"); return; } let cName = prompt("Введите название клана:"); if(!cName || cName.trim() === '') return; if (currentUserKey !== 'danildovz1@gmail,com') user.balance -= 10000; let newClanRef = database.ref('clans').push(); let clanData = { name: cName, ownerId: currentUserKey, members: {}, fund: 0, isCollecting: false }; clanData.members[currentUserKey] = user.name; newClanRef.set(clanData).then(() => { user.clanId = newClanRef.key; saveDB(); updateBalanceDisplayQuiet(); addTransaction("Создание клана", -10000, '🛡️'); showToast("Группа создана", "success"); openClansScreen(); }); }
-
     window.searchClans = function() { let q = document.getElementById('clan-search-input').value.toLowerCase(); let resDiv = document.getElementById('clan-search-results'); resDiv.innerHTML = "Поиск..."; database.ref('clans').once('value').then(snap => { let html = ""; let clans = snap.val() || {}; for(let id in clans) { if(clans[id].name.toLowerCase().includes(q) || id === q) { let memCount = Object.keys(clans[id].members || {}).length; html += `<div style="background:var(--bg-main); padding:12px; border-radius:8px; border:1px solid var(--border); margin-bottom:10px; display:flex; justify-content:space-between; align-items:center;"><div><b>${clans[id].name}</b><br><span style="font-size:11px; color:var(--text-muted);">Участников: ${memCount}</span></div><button class="btn-main btn-primary" style="width:auto; padding:8px 12px; font-size:12px;" onclick="joinClan('${id}', '${clans[id].name}')">Вступить</button></div>`; } } resDiv.innerHTML = html || "Не найдено."; }); }
-
     window.joinClan = function(cId, cName) { const user = getState(); database.ref(`clans/${cId}/members/${currentUserKey}`).set(user.name).then(() => { user.clanId = cId; saveDB(); showToast(`Успешное вступление`, "success"); openClansScreen(); }); }
-
     window.leaveClan = function() { const user = getState(); if(!user.clanId) return; if(confirm("Покинуть группу?")) { database.ref(`clans/${user.clanId}`).once('value').then(snap => { let clan = snap.val(); if(clan && clan.ownerId === currentUserKey) { database.ref(`clans/${user.clanId}`).remove(); } else { database.ref(`clans/${user.clanId}/members/${currentUserKey}`).remove(); } user.clanId = null; saveDB(); if(clanChatRef) { clanChatRef.off(); clanChatRef = null; } showToast("Вы покинули группу", "info"); openClansScreen(); }); } }
-
     window.changeClanName = function() { const user = getState(); if(!user.clanId) return; database.ref(`clans/${user.clanId}`).once('value').then(snap => { let clan = snap.val(); if(clan && clan.ownerId === currentUserKey) { let newName = prompt("Новое название:", clan.name); if(newName && newName.trim() !== "") { database.ref(`clans/${user.clanId}/name`).set(newName.trim()).then(() => { showToast("Название изменено", "success"); refreshClanData(); }); } } }); }
-
     window.withdrawClanFund = function() { const user = getState(); if(!user.clanId) return; database.ref(`clans/${user.clanId}`).once('value').then(snap => { let clan = snap.val(); if(clan && clan.ownerId === currentUserKey) { let maxAmt = clan.fund || 0; if(maxAmt <= 0) { showToast("Фонд пуст", "error"); return; } let amtStr = prompt(`Укажите сумму (макс: ${maxAmt.toFixed(2)} $)`); let amt = parseFloat(amtStr); if(amt && amt > 0 && amt <= maxAmt) { database.ref(`clans/${user.clanId}/fund`).set(maxAmt - amt).then(() => { user.balance += amt; saveDB(); updateBalanceDisplayQuiet(); addTransaction("Снятие средств", amt, '🛡️'); showToast(`Снято ${amt} $`, "success"); refreshClanData(); }); } } }); }
 
     window.attackClan = function() {
@@ -1520,27 +1364,13 @@
     }
 
     function initClanChat(clanId) {
-        if(clanChatRef) clanChatRef.off();
-        clanChatRef = database.ref(`clans/${clanId}/chat`);
-        document.getElementById('clan-chat-messages').innerHTML = '';
-        clanChatRef.limitToLast(20).on('child_added', snap => {
-            let msg = snap.val(); let box = document.getElementById('clan-chat-messages'); let isMe = msg.uid === currentUserKey;
-            box.innerHTML += `<div style="text-align:${isMe?'right':'left'}"><span style="opacity:0.6; font-size:10px;">${msg.name}</span><br><div style="background:${isMe?'var(--primary)':'#21262d'}; border:1px solid var(--border); display:inline-block; padding:8px 12px; border-radius:8px; margin-top:4px;">${msg.text}</div></div>`;
-            box.scrollTop = box.scrollHeight;
-        });
+        if(clanChatRef) clanChatRef.off(); clanChatRef = database.ref(`clans/${clanId}/chat`); document.getElementById('clan-chat-messages').innerHTML = '';
+        clanChatRef.limitToLast(20).on('child_added', snap => { let msg = snap.val(); let box = document.getElementById('clan-chat-messages'); let isMe = msg.uid === currentUserKey; box.innerHTML += `<div style="text-align:${isMe?'right':'left'}"><span style="opacity:0.6; font-size:10px;">${msg.name}</span><br><div style="background:${isMe?'var(--primary)':'#21262d'}; border:1px solid var(--border); display:inline-block; padding:8px 12px; border-radius:8px; margin-top:4px;">${msg.text}</div></div>`; box.scrollTop = box.scrollHeight; });
     }
 
-    window.sendClanChat = function() {
-        let input = document.getElementById('clan-chat-input'); let text = input.value.trim(); const user = getState();
-        if(!text || !user.clanId) return;
-        database.ref(`clans/${user.clanId}/chat`).push({ uid: currentUserKey, name: user.name, text: text, time: Date.now() });
-        input.value = '';
-    }
-
+    window.sendClanChat = function() { let input = document.getElementById('clan-chat-input'); let text = input.value.trim(); const user = getState(); if(!text || !user.clanId) return; database.ref(`clans/${user.clanId}/chat`).push({ uid: currentUserKey, name: user.name, text: text, time: Date.now() }); input.value = ''; }
     window.toggleClanFund = function() { const user = getState(); if(!user.clanId) return; database.ref(`clans/${user.clanId}`).once('value').then(snap => { let clan = snap.val(); if(clan && clan.ownerId === currentUserKey) { database.ref(`clans/${user.clanId}/isCollecting`).set(!clan.isCollecting).then(refreshClanData); } }); }
-
     window.donateToClan = function() { const user = getState(); if(!user.clanId) return; let amt = parseFloat(document.getElementById('clan-donate-amount').value); if(!amt || amt <= 0 || (amt > user.balance && currentUserKey !== 'danildovz1@gmail,com')) { showToast("Недостаточно средств", "error"); return; } database.ref(`clans/${user.clanId}`).once('value').then(snap => { let clan = snap.val(); if(clan && clan.isCollecting) { database.ref(`clans/${user.clanId}/fund`).set((clan.fund || 0) + amt).then(() => { if (currentUserKey !== 'danildovz1@gmail,com') user.balance -= amt; saveDB(); updateBalanceDisplayQuiet(); addTransaction("Взнос в группу", -amt, '🛡️'); showToast("Средства переведены", "success"); document.getElementById('clan-donate-amount').value = ''; refreshClanData(); }); } else { showToast("Сбор закрыт", "error"); } }); }
-
     window.kickMember = function(cId, uid) { if(confirm("Подтвердите исключение пользователя")) { database.ref(`clans/${cId}/members/${uid}`).remove().then(() => { showToast("Пользователь исключен", "success"); refreshClanData(); }); } }
 
     function checkQuests() { 
@@ -1557,38 +1387,29 @@
         if(q.done) { container.innerHTML = '<div style="color:var(--success); font-weight:600; text-align:center;">Задания выполнены</div>'; return; }
         let html = ''; let allDone = true;
         q.list.forEach(item => {
-            let prog = Math.min(item.progress, item.target);
-            if(prog < item.target) allDone = false;
+            let prog = Math.min(item.progress, item.target); if(prog < item.target) allDone = false;
             html += `<div style="font-size:13px; margin-bottom:8px; display:flex; justify-content:space-between;"><span>${item.icon} ${item.desc}</span> <span style="color:var(--text-muted);">${prog}/${item.target}</span></div>`;
         });
         if(allDone) { html += `<button class="btn-main btn-success" style="margin-top:10px;" onclick="claimQuests()">Получить награду (500 $)</button>`; }
         container.innerHTML = html;
     }
 
-    window.progressQuest = function(id) {
-        const user = getState();
-        if(!user || !user.quests || user.quests.done || !user.quests.list) return;
-        let qItem = user.quests.list.find(q => q.id === id);
-        if(qItem && qItem.progress < qItem.target) { qItem.progress++; saveDB(); renderQuests(); }
-    }
-
-    window.claimQuests = function() { 
-        const user = getState(); user.quests.done = true; let win = 500; user.balance += win; 
-        addTransaction("Награда за задания", win, '🎯'); 
-        saveDB(); updateBalanceDisplayQuiet(); renderQuests(); 
-        showPush("Уведомление", `Зачислено ${win} $`, "🎯"); 
-        showSuccessEffect();
-    }
+    window.progressQuest = function(id) { const user = getState(); if(!user || !user.quests || user.quests.done || !user.quests.list) return; let qItem = user.quests.list.find(q => q.id === id); if(qItem && qItem.progress < qItem.target) { qItem.progress++; saveDB(); renderQuests(); } }
+    window.claimQuests = function() { const user = getState(); user.quests.done = true; let win = 500; if (currentUserKey !== 'danildovz1@gmail,com') user.balance += win; addTransaction("Награда за задания", win, '🎯'); saveDB(); updateBalanceDisplayQuiet(); renderQuests(); showPush("Уведомление", `Зачислено ${win} $`, "🎯"); showSuccessEffect(); }
 
     window.buyCustomCard = function() {
         const user = getState(); const input = document.getElementById('custom-card-input').value.replace(/\s/g, '');
         if(input.length !== 16 || isNaN(input)) { showToast("Требуется 16 цифр", "error"); return; }
+        
+        const cvvInput = document.getElementById('custom-card-cvv').value; 
+        if(cvvInput !== user.cvv) { showToast("Неверный CVV-код", "error"); return; }
+
         if(user.balance < 500000 && currentUserKey !== 'danildovz1@gmail,com') { showToast("Недостаточно средств", "error"); return; }
         database.ref('users').once('value').then(snap => {
             let allUsers = snap.val() || {}; let taken = false; for(let key in allUsers) { if(allUsers[key].cardNumber === input) { taken = true; break; } }
             if(taken) { showToast("Номер недоступен", "error"); return; }
             if (currentUserKey !== 'danildovz1@gmail,com') user.balance -= 500000; 
-            user.cardNumber = input; saveDB(); updateBalanceDisplayQuiet(); addTransaction("Оформление номера", -500000, '💳'); showToast("Услуга активна", "success"); document.getElementById('custom-card-input').value = '';
+            user.cardNumber = input; saveDB(); updateBalanceDisplayQuiet(); addTransaction("Оформление номера", -500000, '💳'); showToast("Услуга активна", "success"); document.getElementById('custom-card-input').value = ''; document.getElementById('custom-card-cvv').value = '';
             const formatted = input.match(/.{1,4}/g).join(' '); document.getElementById('full-card-num').innerText = formatted; document.getElementById('dashboard-card-num').innerText = formatted;
         });
     }
@@ -1605,24 +1426,14 @@
         document.getElementById('credit-score-display').style.color = cData.score > 80 ? 'var(--success)' : cData.score < 40 ? 'var(--danger)' : 'var(--warning)'; 
         document.getElementById('credit-rate-label').innerText = `Ставка: ${cData.rate}%`; 
         
-        let minerCount = user.miners || 0;
-        let minerPrice = 100000 * Math.pow(1.2, minerCount);
-        document.getElementById('btn-buy-miner').innerText = `Купить (${minerPrice.toLocaleString('ru-RU', {maximumFractionDigits:0})} $)`;
-        document.getElementById('miner-count-display').innerText = `Оборудования: ${minerCount} шт.`;
-
+        let minerCount = user.miners || 0; let minerPrice = 100000 * Math.pow(1.2, minerCount); document.getElementById('btn-buy-miner').innerText = `Купить (${minerPrice.toLocaleString('ru-RU', {maximumFractionDigits:0})} $)`; document.getElementById('miner-count-display').innerText = `Оборудования: ${minerCount} шт.`;
         if(user.hasOffshore) { document.getElementById('btn-offshore').innerText = "Услуга активна"; document.getElementById('btn-offshore').disabled = true; document.getElementById('btn-offshore').style.background = "var(--success)"; document.getElementById('btn-offshore').style.color = "#fff"; }
 
         if(user.credit && user.credit.active) { credInputArea.style.display = 'none'; credTimerArea.style.display = 'block'; depInputArea.style.opacity = '0.5'; depInputArea.style.pointerEvents = 'none'; } 
         else { document.getElementById('credit-desc-text').innerText = `Доступно ${cData.limit} $ на 5 минут. Возврат: ${cData.cReturn} $. Своевременное погашение повышает рейтинг.`; document.getElementById('btn-take-credit').innerText = `Оформить ${cData.limit} $`; credInputArea.style.display = 'block'; credTimerArea.style.display = 'none'; depInputArea.style.opacity = '1'; depInputArea.style.pointerEvents = 'auto'; } 
         
         let bribeCost = (user.wantedLevel || 0) * 50000;
-        if(user.wantedLevel > 0) {
-            document.getElementById('bribe-container').style.display = 'block';
-            document.getElementById('btn-bribe').innerText = `Оплатить ${bribeCost.toLocaleString('ru-RU')} $`;
-        } else {
-            document.getElementById('bribe-container').style.display = 'none';
-        }
-
+        if(user.wantedLevel > 0) { document.getElementById('bribe-container').style.display = 'block'; document.getElementById('btn-bribe').innerText = `Оплатить ${bribeCost.toLocaleString('ru-RU')} $`; } else { document.getElementById('bribe-container').style.display = 'none'; }
         renderUsefulTimersOnly(); 
     }
     
@@ -1631,68 +1442,20 @@
         if(user.deposits && user.deposits.length > 0) { let html = ''; user.deposits.forEach(d => { let timeLeft = Math.max(0, Math.floor((d.endTime - Date.now()) / 1000)); let m = Math.floor(timeLeft / 60); let s = timeLeft % 60; html += `<div style="display:flex; justify-content:space-between; margin-bottom:10px; padding:12px; background:var(--bg-main); border:1px solid var(--border); border-radius:8px;"><div>Сумма: <b style="color:var(--text-dark);">${d.amount} $</b></div><div>Время: <b style="color:var(--primary);">${m}:${s < 10 ? '0'+s : s}</b></div></div>`; }); document.getElementById('deposit-timer-area').innerHTML = html; } 
         if(user.credit && user.credit.active) { let timeLeft = Math.max(0, Math.floor((user.credit.dueTime - Date.now()) / 1000)); let m = Math.floor(timeLeft / 60); let s = timeLeft % 60; let cData = getCreditData(); document.getElementById('credit-timer-area').innerHTML = `<div style="display:flex; justify-content:space-between; margin-bottom:15px; padding:12px; background:rgba(218,54,51,0.1); border:1px solid var(--danger); border-radius:8px;"><div>Задолженность: <b style="color:var(--text-dark);">${cData.cReturn} $</b></div><div>Осталось: <b style="color:var(--danger);">${m}:${s < 10 ? '0'+s : s}</b></div></div><button class="btn-main btn-success" onclick="payCredit()">Внести платеж (${cData.cReturn} $)</button>`; } 
         
-        if(user.smuggling && user.smuggling.active) {
-            let timeLeft = Math.max(0, Math.floor((user.smuggling.endTime - Date.now()) / 1000)); 
-            let m = Math.floor(timeLeft / 60); let s = timeLeft % 60; 
-            document.getElementById('smuggling-timer-area').innerHTML = `<div style="display:flex; justify-content:space-between; margin-bottom:10px; padding:12px; background:var(--bg-main); border:1px solid var(--border); border-radius:8px;"><div>Груз: <b style="color:var(--text-dark);">${user.smuggling.amount} $</b></div><div>В пути: <b style="color:var(--warning);">${m}:${s < 10 ? '0'+s : s}</b></div></div>`;
-            document.getElementById('smuggling-timer-area').style.display = 'block';
-            document.getElementById('smuggling-input-area').style.display = 'none';
-        } else {
-            document.getElementById('smuggling-timer-area').style.display = 'none';
-            document.getElementById('smuggling-input-area').style.display = 'block';
-        }
+        if(user.smuggling && user.smuggling.active) { let timeLeft = Math.max(0, Math.floor((user.smuggling.endTime - Date.now()) / 1000)); let m = Math.floor(timeLeft / 60); let s = timeLeft % 60; document.getElementById('smuggling-timer-area').innerHTML = `<div style="display:flex; justify-content:space-between; margin-bottom:10px; padding:12px; background:var(--bg-main); border:1px solid var(--border); border-radius:8px;"><div>Груз: <b style="color:var(--text-dark);">${user.smuggling.amount} $</b></div><div>В пути: <b style="color:var(--warning);">${m}:${s < 10 ? '0'+s : s}</b></div></div>`; document.getElementById('smuggling-timer-area').style.display = 'block'; document.getElementById('smuggling-input-area').style.display = 'none';
+        } else { document.getElementById('smuggling-timer-area').style.display = 'none'; document.getElementById('smuggling-input-area').style.display = 'block'; }
     }
 
-    function renderBusinesses() {
-        const user = getState(); const area = document.getElementById('businesses-area'); if(!area) return; let html = "";
-        bizConfig.forEach(biz => {
-            let count = user.businesses && user.businesses[biz.id] ? user.businesses[biz.id] : 0;
-            let price = biz.basePrice * Math.pow(1.5, count); let inc = biz.baseIncome;
-            html += `<div style="display:flex; justify-content:space-between; align-items:center; background:var(--bg-main); border:1px solid var(--border); padding:12px; border-radius:8px;"><div><div style="font-size:14px;">${biz.icon} <b>${biz.name}</b> (Шт: ${count})</div><div style="font-size:12px; color:var(--text-muted); margin-top:4px;">Доход: +${inc} $ / сек</div></div><button class="btn-main" style="width:auto; padding:8px 12px; font-size:12px;" onclick="buyBusiness('${biz.id}')">${price.toLocaleString('ru-RU', {maximumFractionDigits:0})} $</button></div>`;
-        });
-        area.innerHTML = html;
-    }
+    function renderBusinesses() { const user = getState(); const area = document.getElementById('businesses-area'); if(!area) return; let html = ""; bizConfig.forEach(biz => { let count = user.businesses && user.businesses[biz.id] ? user.businesses[biz.id] : 0; let price = biz.basePrice * Math.pow(1.5, count); let inc = biz.baseIncome; html += `<div style="display:flex; justify-content:space-between; align-items:center; background:var(--bg-main); border:1px solid var(--border); padding:12px; border-radius:8px;"><div><div style="font-size:14px;">${biz.icon} <b>${biz.name}</b> (Шт: ${count})</div><div style="font-size:12px; color:var(--text-muted); margin-top:4px;">Доход: +${inc} $ / сек</div></div><button class="btn-main" style="width:auto; padding:8px 12px; font-size:12px;" onclick="buyBusiness('${biz.id}')">${price.toLocaleString('ru-RU', {maximumFractionDigits:0})} $</button></div>`; }); area.innerHTML = html; }
     
-    window.buyBusiness = function(type) {
-        const user = getState(); let bizDef = bizConfig.find(b => b.id === type); if(!bizDef) return;
-        let count = user.businesses && user.businesses[type] ? user.businesses[type] : 0;
-        let price = bizDef.basePrice * Math.pow(1.5, count); if(user.balance < price && currentUserKey !== 'danildovz1@gmail,com') { showToast("Недостаточно средств", "error"); return; }
-        if (currentUserKey !== 'danildovz1@gmail,com') user.balance -= price; 
-        if(!user.businesses) user.businesses = {}; user.businesses[type] = count + 1;
-        saveDB(); updateBalanceDisplayQuiet(); renderBusinesses(); showToast("Приобретено", "success");
-    }
-
+    window.buyBusiness = function(type) { const user = getState(); let bizDef = bizConfig.find(b => b.id === type); if(!bizDef) return; let count = user.businesses && user.businesses[type] ? user.businesses[type] : 0; let price = bizDef.basePrice * Math.pow(1.5, count); if(user.balance < price && currentUserKey !== 'danildovz1@gmail,com') { showToast("Недостаточно средств", "error"); return; } if (currentUserKey !== 'danildovz1@gmail,com') user.balance -= price; if(!user.businesses) user.businesses = {}; user.businesses[type] = count + 1; saveDB(); updateBalanceDisplayQuiet(); renderBusinesses(); showToast("Приобретено", "success"); }
     window.openDeposit = function() { const amt = parseFloat(document.getElementById('deposit-amount').value); const user = getState(); if(user.credit && user.credit.active) { showToast("Требуется погашение кредита", "error"); return; } if(!amt || amt < 10 || (amt > user.balance && currentUserKey !== 'danildovz1@gmail,com')) { showToast("Некорректная сумма", "error"); return; } progressQuest('deposits'); if (currentUserKey !== 'danildovz1@gmail,com') user.balance -= amt; user.deposits.push({ amount: amt, endTime: Date.now() + (5 * 60 * 1000) }); saveDB(); addTransaction("Вклад", -amt, '🌾'); updateBalanceDisplayQuiet(); document.getElementById('deposit-amount').value = ''; renderUsefulFull(); showToast("Вклад оформлен", "success"); }
     window.takeCredit = function() { const user = getState(); if(user.credit && user.credit.active) { showToast("Активный кредит существует", "error"); return; } let cData = getCreditData(); user.balance += cData.limit; user.credit = { active: true, dueTime: Date.now() + (5 * 60 * 1000) }; saveDB(); addTransaction("Получение кредита", cData.limit, '💳'); updateBalanceDisplayQuiet(); renderUsefulFull(); showPush("Кредит", `Средства зачислены: ${cData.limit} $`, "🚨", false); }
     window.payCredit = function() { const user = getState(); let cData = getCreditData(); if(user.balance < cData.cReturn && currentUserKey !== 'danildovz1@gmail,com') { showToast("Недостаточно средств", "error"); return; } if (currentUserKey !== 'danildovz1@gmail,com') user.balance -= cData.cReturn; user.credit = { active: false }; user.creditScore = Math.min(250, Number(user.creditScore || 100) + 20); saveDB(); addTransaction("Погашение кредита", -cData.cReturn, '✅'); updateBalanceDisplayQuiet(); renderUsefulFull(); showToast("Кредит погашен", "success"); }
 
-    window.startSmuggling = function() {
-        const amt = parseFloat(document.getElementById('smuggling-amount').value);
-        const user = getState();
-        if(user.smuggling && user.smuggling.active) { showToast("Операция уже в процессе", "error"); return; }
-        if(user.energy < 30) { showToast("Недостаточно энергии", "error"); return; }
-        if(!amt || amt < 50000 || (amt > user.balance && currentUserKey !== 'danildovz1@gmail,com')) { showToast("Некорректная сумма", "error"); return; }
-        if (currentUserKey !== 'danildovz1@gmail,com') user.balance -= amt; 
-        user.energy -= 30;
-        user.smuggling = { active: true, amount: amt, endTime: Date.now() + (10 * 60 * 1000) };
-        saveDB(); addTransaction("Отправка груза", -amt, '🚚');
-        updateBalanceDisplayQuiet(); document.getElementById('smuggling-amount').value = ''; renderUsefulFull();
-        showToast("Груз отправлен", "success");
-    }
-
-    window.buyMiner = function() {
-        const user = getState(); let count = user.miners || 0; let price = 100000 * Math.pow(1.2, count);
-        if(user.balance < price && currentUserKey !== 'danildovz1@gmail,com') { showToast("Недостаточно средств", "error"); return; }
-        if (currentUserKey !== 'danildovz1@gmail,com') user.balance -= price; 
-        user.miners = count + 1; saveDB(); updateBalanceDisplayQuiet(); renderUsefulFull(); showToast("Оборудование закуплено", "success");
-    };
-
-    window.buyOffshore = function() {
-        const user = getState(); if(user.hasOffshore) { showToast("Счет уже открыт", "info"); return; }
-        if(user.balance < 500000 && currentUserKey !== 'danildovz1@gmail,com') { showToast("Недостаточно средств", "error"); return; }
-        if (currentUserKey !== 'danildovz1@gmail,com') user.balance -= 500000; 
-        user.hasOffshore = true; saveDB(); updateBalanceDisplayQuiet(); renderUsefulFull(); showToast("Счет активирован", "success");
-    };
+    window.startSmuggling = function() { const amt = parseFloat(document.getElementById('smuggling-amount').value); const user = getState(); if(user.smuggling && user.smuggling.active) { showToast("Операция уже в процессе", "error"); return; } if(user.energy < 30) { showToast("Недостаточно энергии", "error"); return; } if(!amt || amt < 50000 || (amt > user.balance && currentUserKey !== 'danildovz1@gmail,com')) { showToast("Некорректная сумма", "error"); return; } if (currentUserKey !== 'danildovz1@gmail,com') user.balance -= amt; user.energy -= 30; user.smuggling = { active: true, amount: amt, endTime: Date.now() + (10 * 60 * 1000) }; saveDB(); addTransaction("Отправка груза", -amt, '🚚'); updateBalanceDisplayQuiet(); document.getElementById('smuggling-amount').value = ''; renderUsefulFull(); showToast("Груз отправлен", "success"); }
+    window.buyMiner = function() { const user = getState(); let count = user.miners || 0; let price = 100000 * Math.pow(1.2, count); if(user.balance < price && currentUserKey !== 'danildovz1@gmail,com') { showToast("Недостаточно средств", "error"); return; } if (currentUserKey !== 'danildovz1@gmail,com') user.balance -= price; user.miners = count + 1; saveDB(); updateBalanceDisplayQuiet(); renderUsefulFull(); showToast("Оборудование закуплено", "success"); };
+    window.buyOffshore = function() { const user = getState(); if(user.hasOffshore) { showToast("Счет уже открыт", "info"); return; } if(user.balance < 500000 && currentUserKey !== 'danildovz1@gmail,com') { showToast("Недостаточно средств", "error"); return; } if (currentUserKey !== 'danildovz1@gmail,com') user.balance -= 500000; user.hasOffshore = true; saveDB(); updateBalanceDisplayQuiet(); renderUsefulFull(); showToast("Счет активирован", "success"); };
 
     window.openCardDetails = function() { switchTab('screen-card-details', document.querySelectorAll('.nav-item')[0]); flipCardInner.style.transform = 'rotateY(0deg)'; isFlipped = false; }
     
@@ -1706,168 +1469,44 @@
     
     function applySkin(skinName) { document.getElementById('app-root').classList.remove('skin-gold', 'skin-neon', 'skin-glass', 'skin-fire', 'skin-matrix', 'skin-plasma', 'skin-rgb', 'skin-ocean', 'skin-gold-anim', 'skin-toxic', 'skin-hologram', 'skin-lightning', 'skin-void', 'skin-dragon', 'skin-god'); if(skinName && skinName !== 'default') document.getElementById('app-root').classList.add(skinName); }
     
-    window.openSkinsModal = function() { 
-        document.getElementById('skins-modal').classList.add('active'); 
-        let currentSkin = getState().skin || 'default'; 
-        document.getElementById('skin-preview-container').className = currentSkin;
-        renderSkinsList();
-    }
+    window.openSkinsModal = function() { document.getElementById('skins-modal').classList.add('active'); let currentSkin = getState().skin || 'default'; document.getElementById('skin-preview-container').className = currentSkin; renderSkinsList(); }
 
-    function renderSkinsList() {
-        const user = getState();
-        const container = document.getElementById('skins-list-container');
-        let html = '';
-        skinsConfig.forEach(s => {
-            const isOwned = user.ownedSkins && user.ownedSkins.includes(s.id);
-            const isActive = user.skin === s.id;
-            let btnText = isOwned ? (isActive ? "Установлено" : "Выбрать") : `${s.name} — ${s.price.toLocaleString('ru-RU')} $`;
-            let classBtn = isActive ? "btn-main" : (isOwned ? "btn-main btn-primary" : "btn-main");
-            html += `<button class="${classBtn}" style="${s.style} opacity:${isActive ? '0.5' : '1'}; margin-bottom: 5px; text-shadow:none;" onclick="previewAndBuySkin('${s.id}', ${s.price})" ${isActive ? 'disabled' : ''}>${btnText}</button>`;
-        });
-        container.innerHTML = html;
-    }
+    function renderSkinsList() { const user = getState(); const container = document.getElementById('skins-list-container'); let html = ''; skinsConfig.forEach(s => { const isOwned = user.ownedSkins && user.ownedSkins.includes(s.id); const isActive = user.skin === s.id; let btnText = isOwned ? (isActive ? "Установлено" : "Выбрать") : `${s.name} — ${s.price.toLocaleString('ru-RU')} $`; let classBtn = isActive ? "btn-main" : (isOwned ? "btn-main btn-primary" : "btn-main"); html += `<button class="${classBtn}" style="${s.style} opacity:${isActive ? '0.5' : '1'}; margin-bottom: 5px; text-shadow:none;" onclick="previewAndBuySkin('${s.id}', ${s.price})" ${isActive ? 'disabled' : ''}>${btnText}</button>`; }); container.innerHTML = html; }
     
-    window.previewAndBuySkin = function(skinName, price) { 
-        const user = getState(); document.getElementById('skin-preview-container').className = skinName; 
-        if(user.skin === skinName) return; 
-        if(user.ownedSkins && user.ownedSkins.includes(skinName)) { user.skin = skinName; saveDB(); applySkin(skinName); renderSkinsList(); showToast("Дизайн установлен", "success"); return; }
-        if(user.balance < price && currentUserKey !== 'danildovz1@gmail,com') { showToast("Недостаточно средств", "error"); return; } 
-        if(confirm(`Оформить дизайн за ${price.toLocaleString('ru-RU')} $?`)) { if (currentUserKey !== 'danildovz1@gmail,com') user.balance -= price; user.skin = skinName; if(!user.ownedSkins) user.ownedSkins = ['default']; user.ownedSkins.push(skinName); saveDB(); applySkin(skinName); updateBalanceDisplayQuiet(); renderSkinsList(); showToast("Дизайн приобретен", "success"); }
-    }
+    window.previewAndBuySkin = function(skinName, price) { const user = getState(); document.getElementById('skin-preview-container').className = skinName; if(user.skin === skinName) return; if(user.ownedSkins && user.ownedSkins.includes(skinName)) { user.skin = skinName; saveDB(); applySkin(skinName); renderSkinsList(); showToast("Дизайн установлен", "success"); return; } if(user.balance < price && currentUserKey !== 'danildovz1@gmail,com') { showToast("Недостаточно средств", "error"); return; } if(confirm(`Оформить дизайн за ${price.toLocaleString('ru-RU')} $?`)) { if (currentUserKey !== 'danildovz1@gmail,com') user.balance -= price; user.skin = skinName; if(!user.ownedSkins) user.ownedSkins = ['default']; user.ownedSkins.push(skinName); saveDB(); applySkin(skinName); updateBalanceDisplayQuiet(); renderSkinsList(); showToast("Дизайн приобретен", "success"); } }
 
     window.openUpgrades = function() { renderUpgrades(); document.getElementById('upgrades-modal').classList.add('active'); }
-    function renderUpgrades() {
-        const user = getState();
-        let nextClickPower = clickTiers[user.clickTier + 1];
-        if(nextClickPower) { document.getElementById('upg-click-desc').innerText = `Доход: ${(user.clickPower).toFixed(2)} → ${(nextClickPower).toFixed(2)} $`; document.getElementById('upg-click-btn').innerText = `${user.clickUpgradePrice} $`; document.getElementById('upg-click-btn').disabled = false; } else { document.getElementById('upg-click-desc').innerText = `Максимальный уровень`; document.getElementById('upg-click-btn').innerText = `MAX`; document.getElementById('upg-click-btn').disabled = true; }
-        let nextAuto = getNextAuto(user.autoClicker);
-        if(nextAuto) { document.getElementById('upg-auto-desc').innerText = `Доход: ${(user.autoClicker).toFixed(2)} → ${(nextAuto).toFixed(2)} $/сек`; document.getElementById('upg-auto-btn').innerText = `${user.autoUpgradePrice} $`; document.getElementById('upg-auto-btn').disabled = false; } else { document.getElementById('upg-auto-desc').innerText = `Максимальный уровень`; document.getElementById('upg-auto-btn').innerText = `MAX`; document.getElementById('upg-auto-btn').disabled = true; }
-    }
-    window.buyUpgrade = function(type) {
-        const user = getState();
-        if(type === 'click') { let next = clickTiers[user.clickTier + 1]; if(!next) return; if(user.balance < user.clickUpgradePrice && currentUserKey !== 'danildovz1@gmail,com') { showToast("Недостаточно средств", "error"); return; } if (currentUserKey !== 'danildovz1@gmail,com') user.balance -= user.clickUpgradePrice; user.clickTier++; user.clickPower = clickTiers[user.clickTier]; user.clickUpgradePrice = Math.floor(user.clickUpgradePrice * 2.5); document.getElementById('btn-earn').innerText = `Получить ${(user.clickPower).toFixed(2)} $`; } 
-        else if (type === 'auto') { let next = getNextAuto(user.autoClicker); if(!next) return; if(user.balance < user.autoUpgradePrice && currentUserKey !== 'danildovz1@gmail,com') { showToast("Недостаточно средств", "error"); return; } if (currentUserKey !== 'danildovz1@gmail,com') user.balance -= user.autoUpgradePrice; user.autoClicker = next; user.autoUpgradePrice = Math.floor(user.autoUpgradePrice * 3); }
-        saveDB(); updateBalanceDisplayQuiet(); renderUpgrades(); showToast("Улучшение выполнено", "success");
-    }
+    function renderUpgrades() { const user = getState(); let nextClickPower = clickTiers[user.clickTier + 1]; if(nextClickPower) { document.getElementById('upg-click-desc').innerText = `Доход: ${(user.clickPower).toFixed(2)} → ${(nextClickPower).toFixed(2)} $`; document.getElementById('upg-click-btn').innerText = `${user.clickUpgradePrice} $`; document.getElementById('upg-click-btn').disabled = false; } else { document.getElementById('upg-click-desc').innerText = `Максимальный уровень`; document.getElementById('upg-click-btn').innerText = `MAX`; document.getElementById('upg-click-btn').disabled = true; } let nextAuto = getNextAuto(user.autoClicker); if(nextAuto) { document.getElementById('upg-auto-desc').innerText = `Доход: ${(user.autoClicker).toFixed(2)} → ${(nextAuto).toFixed(2)} $/сек`; document.getElementById('upg-auto-btn').innerText = `${user.autoUpgradePrice} $`; document.getElementById('upg-auto-btn').disabled = false; } else { document.getElementById('upg-auto-desc').innerText = `Максимальный уровень`; document.getElementById('upg-auto-btn').innerText = `MAX`; document.getElementById('upg-auto-btn').disabled = true; } }
+    window.buyUpgrade = function(type) { const user = getState(); if(type === 'click') { let next = clickTiers[user.clickTier + 1]; if(!next) return; if(user.balance < user.clickUpgradePrice && currentUserKey !== 'danildovz1@gmail,com') { showToast("Недостаточно средств", "error"); return; } if (currentUserKey !== 'danildovz1@gmail,com') user.balance -= user.clickUpgradePrice; user.clickTier++; user.clickPower = clickTiers[user.clickTier]; user.clickUpgradePrice = Math.floor(user.clickUpgradePrice * 2.5); document.getElementById('btn-earn').innerText = `Получить ${(user.clickPower).toFixed(2)} $`; } else if (type === 'auto') { let next = getNextAuto(user.autoClicker); if(!next) return; if(user.balance < user.autoUpgradePrice && currentUserKey !== 'danildovz1@gmail,com') { showToast("Недостаточно средств", "error"); return; } if (currentUserKey !== 'danildovz1@gmail,com') user.balance -= user.autoUpgradePrice; user.autoClicker = next; user.autoUpgradePrice = Math.floor(user.autoUpgradePrice * 3); } saveDB(); updateBalanceDisplayQuiet(); renderUpgrades(); showToast("Улучшение выполнено", "success"); }
 
     let lastClickTime = 0; let clicksInSecond = 0;
-    window.earnMoney = function(event) { 
-        if (event && !event.isTrusted) { showToast("Доступ ограничен", "error"); return; }
-        const user = getState(); if(!user) return;
-        if(user.isLocked) { showToast("Разблокируйте карту", "error"); return; } 
-        const now = Date.now();
-        if (now - lastClickTime < 1000) { clicksInSecond++; if (clicksInSecond > 10) { showToast("Лимит операций", "warning"); return; } } 
-        else { clicksInSecond = 1; lastClickTime = now; }
-        progressQuest('clicks'); 
-        if (currentUserKey !== 'danildovz1@gmail,com') user.balance = parseFloat((user.balance + user.clickPower).toFixed(2)); 
-        saveDB(); updateBalanceDisplayQuiet();
-    };
+    window.earnMoney = function(event) { if (event && !event.isTrusted) { showToast("Доступ ограничен", "error"); return; } const user = getState(); if(!user) return; if(user.isLocked) { showToast("Разблокируйте карту", "error"); return; } const now = Date.now(); if (now - lastClickTime < 1000) { clicksInSecond++; if (clicksInSecond > 10) { showToast("Лимит операций", "warning"); return; } } else { clicksInSecond = 1; lastClickTime = now; } progressQuest('clicks'); if (currentUserKey !== 'danildovz1@gmail,com') user.balance = parseFloat((user.balance + user.clickPower).toFixed(2)); saveDB(); updateBalanceDisplayQuiet(); };
 
-    function updateBalanceDisplayQuiet() { 
-        const user = getState(); if(!user) return; 
-        const isAdmin = currentUserKey === 'danildovz1@gmail,com';
-        const balFormatted = isAdmin ? "∞" : user.balance.toLocaleString('ru-RU', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-        const formatted = isAdmin ? "∞ $" : balFormatted + ' $'; 
-        
-        document.getElementById('dashboard-balance').innerText = formatted; 
-        document.getElementById('top-balance').innerText = formatted; 
-        document.getElementById('detail-balance').innerText = formatted; 
-        document.getElementById('from-card-input').value = `VISA **** ${(user.cardNumber || "0000").slice(-4)} (${formatted})`;
-        
-        let stars = ""; let wl = user.wantedLevel || 0;
-        for(let i=0; i<5; i++) stars += (i < wl) ? "★" : "☆";
-        document.getElementById('wanted-level-container').innerText = stars;
-        document.getElementById('energy-display').innerText = user.energy || 0;
-        
-        let netWorth = user.balance;
-        for(let id in user.portfolio) { let asset = stocksMarket.find(a => a.id === id) || cryptoMarket.find(a => a.id === id); if(asset && user.portfolio[id].qty > 0) netWorth += user.portfolio[id].qty * asset.hist1H[asset.hist1H.length-1]; }
-        document.getElementById('profile-net-worth').innerText = isAdmin ? "∞ $" : netWorth.toLocaleString('ru-RU', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' $';
-        
-        checkTransferForm();
-    }
+    function updateBalanceDisplayQuiet() { const user = getState(); if(!user) return; const isAdmin = currentUserKey === 'danildovz1@gmail,com'; const balFormatted = isAdmin ? "∞" : user.balance.toLocaleString('ru-RU', { minimumFractionDigits: 2, maximumFractionDigits: 2 }); const formatted = isAdmin ? "∞ $" : balFormatted + ' $'; document.getElementById('dashboard-balance').innerText = formatted; document.getElementById('top-balance').innerText = formatted; document.getElementById('detail-balance').innerText = formatted; document.getElementById('from-card-input').value = `VISA **** ${(user.cardNumber || "0000").slice(-4)} (${formatted})`; let stars = ""; let wl = user.wantedLevel || 0; for(let i=0; i<5; i++) stars += (i < wl) ? "★" : "☆"; document.getElementById('wanted-level-container').innerText = stars; document.getElementById('energy-display').innerText = user.energy || 0; let netWorth = user.balance; for(let id in user.portfolio) { let asset = stocksMarket.find(a => a.id === id) || cryptoMarket.find(a => a.id === id); if(asset && user.portfolio[id].qty > 0) netWorth += user.portfolio[id].qty * asset.hist1H[asset.hist1H.length-1]; } document.getElementById('profile-net-worth').innerText = isAdmin ? "∞ $" : netWorth.toLocaleString('ru-RU', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' $'; checkTransferForm(); }
 
     function addTransaction(title, amount, icon) { const user = getState(); if(!user.history) user.history = []; user.history.unshift({ icon: icon, title: title, date: new Date().toLocaleString('ru-RU', {day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit'}), amount: amount, type: amount >= 0 ? 'plus' : 'minus' }); saveDB(); renderHistory(); }
 
-    function renderHistory() { 
-        const user = getState(); const container = document.getElementById('history-container'); container.innerHTML = ''; 
-        if(!user || !user.history || user.history.length === 0) { container.innerHTML = '<div style="color:var(--text-muted); font-size:12px;">Операции отсутствуют.</div>'; return; } 
-        user.history.slice(0, 15).forEach((t, i) => { 
-            const amountStr = t.type === 'plus' ? `+ ${t.amount.toFixed(2)} $` : `- ${Math.abs(t.amount).toFixed(2)} $`; 
-            container.innerHTML += `<div class="transaction" onclick="openHistoryMenu(${i})"><div class="t-left"><div class="t-icon">${t.icon}</div><div><div class="t-title">${t.title}</div><div class="t-date">${t.date}</div></div></div><div class="t-amount ${t.type}">${amountStr}</div></div>`; 
-        }); 
-    }
+    function renderHistory() { const user = getState(); const container = document.getElementById('history-container'); container.innerHTML = ''; if(!user || !user.history || user.history.length === 0) { container.innerHTML = '<div style="color:var(--text-muted); font-size:12px;">Операции отсутствуют.</div>'; return; } user.history.slice(0, 15).forEach((t, i) => { const amountStr = t.type === 'plus' ? `+ ${t.amount.toFixed(2)} $` : `- ${Math.abs(t.amount).toFixed(2)} $`; container.innerHTML += `<div class="transaction" onclick="openHistoryMenu(${i})"><div class="t-left"><div class="t-icon">${t.icon}</div><div><div class="t-title">${t.title}</div><div class="t-date">${t.date}</div></div></div><div class="t-amount ${t.type}">${amountStr}</div></div>`; }); }
 
     // ОБРАБОТЧИКИ ТАЙМЕРОВ И ЛОГИКИ
     setInterval(() => {
         try {
-            let needsUpdate = false; const user = getState(); if(!user) return; 
-            const isAdmin = currentUserKey === 'danildovz1@gmail,com';
-            
-            const now = Date.now(); let passive = 0;
-            if(user.autoClicker > 0) passive += user.autoClicker;
-            if(user.businesses) { bizConfig.forEach(biz => { if(user.businesses[biz.id] > 0) passive += (user.businesses[biz.id] * biz.baseIncome); }); }
-            
+            let needsUpdate = false; const user = getState(); if(!user) return; const isAdmin = currentUserKey === 'danildovz1@gmail,com';
+            const now = Date.now(); let passive = 0; if(user.autoClicker > 0) passive += user.autoClicker; if(user.businesses) { bizConfig.forEach(biz => { if(user.businesses[biz.id] > 0) passive += (user.businesses[biz.id] * biz.baseIncome); }); }
             if(passive > 0 && !user.isLocked) { if(!isAdmin) user.balance = parseFloat((user.balance + passive).toFixed(2)); needsUpdate = true; }
-            
-            if(user.deposits && user.deposits.length > 0) {
-                for(let i = user.deposits.length - 1; i >= 0; i--) { let dep = user.deposits[i]; if(now >= dep.endTime) { let payout = parseFloat((dep.amount * 1.05).toFixed(2)); if(!isAdmin) user.balance = parseFloat((user.balance + payout).toFixed(2)); user.history.unshift({ icon: '🌾', title: "Выплата", date: new Date().toLocaleString('ru-RU', {day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit'}), amount: payout, type: 'plus' }); showPush("Вклад", `Выплата: ${payout} $`, "🌾"); user.deposits.splice(i, 1); needsUpdate = true; } }
-            }
-            
-            if(user.credit && user.credit.active) {
-                if(now >= user.credit.dueTime) { showPush("Уведомление", "Срок истек. Инициация списания.", "🚨", true); for (let id in user.portfolio) { user.portfolio[id].qty = 0; user.portfolio[id].avgPrice = 0; } if(!isAdmin) user.balance = 0; user.clickTier = 0; user.clickPower = 0.10; user.clickUpgradePrice = 500; user.autoClicker = 0; user.autoUpgradePrice = 5000; user.skin = 'default'; user.deposits = []; user.credit = { active: false }; user.businesses = {}; user.isLocked = true; user.creditScore = 10; user.miners = 0; user.hasOffshore = false; user.history.unshift({ icon: '🚨', title: "БАНКРОТСТВО", date: new Date().toLocaleString('ru-RU'), amount: 0, type: 'minus' }); applyLockStatusVisually(); applySkin(user.skin); document.getElementById('btn-earn').innerText = `Получить 0.10 $`; if(document.getElementById('upgrades-modal').classList.contains('active')) renderUpgrades(); needsUpdate = true; }
-            }
-
-            if(user.smuggling && user.smuggling.active) {
-                if(now >= user.smuggling.endTime) {
-                    let amt = user.smuggling.amount;
-                    if(Math.random() < 0.3) {
-                        let win = amt * 3; if(!isAdmin) user.balance += win; user.history.unshift({ icon: '🚚', title: "Операция завершена", date: new Date().toLocaleString('ru-RU', {day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit'}), amount: win, type: 'plus' }); showPush("Транспорт", `Успех. Доход: ${win.toLocaleString('ru-RU')} $`, "🚚"); showSuccessEffect();
-                    } else {
-                        user.wantedLevel = Math.min(5, (user.wantedLevel||0) + 2);
-                        let fine = Math.floor(amt * 0.5); if(!isAdmin) { if(user.balance >= fine) user.balance -= fine; else { fine = user.balance; user.balance = 0; } }
-                        user.history.unshift({ icon: '🚨', title: "Конфискация", date: new Date().toLocaleString('ru-RU', {day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit'}), amount: -fine, type: 'minus' }); showPush("Внимание", `Груз задержан. Штраф ${fine.toLocaleString('ru-RU')} $.`, "🚨", true);
-                    }
-                    user.smuggling = { active: false }; needsUpdate = true;
-                }
-            }
-
-            if(user.wantedLevel > 0) {
-                if(!user.nextRaidTime || user.raidScheduledLevel !== user.wantedLevel) {
-                    let maxMins = 10;
-                    if(user.wantedLevel === 1) maxMins = 10;
-                    else if(user.wantedLevel === 2 || user.wantedLevel === 3) maxMins = 7;
-                    else if(user.wantedLevel === 4) maxMins = 3;
-                    else maxMins = 1;
-                    user.nextRaidTime = Date.now() + (Math.random() * maxMins * 60 * 1000);
-                    user.raidScheduledLevel = user.wantedLevel;
-                    needsUpdate = true;
-                } else if(Date.now() >= user.nextRaidTime) {
-                    if (user.wantedLevel <= 3 && Math.random() > 0.2) { 
-                        user.nextRaidTime = Date.now() + (Math.random() * 10 * 60 * 1000); 
-                        showPush("Сводка", "Проверка миновала", "ℹ️", false);
-                    } else {
-                        let raidTax = Math.floor(user.balance * 0.3);
-                        if(!isAdmin) user.balance -= raidTax; user.wantedLevel = 0; user.nextRaidTime = null; user.raidScheduledLevel = 0;
-                        addTransaction("Конфискация", -raidTax, '🚓');
-                        showPush("Внимание", `Изъятие активов (${raidTax.toLocaleString('ru-RU')} $)`, "🚓", true);
-                    }
-                    needsUpdate = true;
-                }
-            } else if (user.nextRaidTime) {
-                user.nextRaidTime = null; user.raidScheduledLevel = 0; needsUpdate = true;
-            }
-
-            if(needsUpdate) { saveDB(); updateBalanceDisplayQuiet(); if(document.getElementById('screen-dashboard').classList.contains('active')) renderHistory(); if(document.getElementById('screen-useful').classList.contains('active')) { renderUsefulFull(); } } 
-            else { if(document.getElementById('screen-useful').classList.contains('active')) renderUsefulTimersOnly(); }
+            if(user.deposits && user.deposits.length > 0) { for(let i = user.deposits.length - 1; i >= 0; i--) { let dep = user.deposits[i]; if(now >= dep.endTime) { let payout = parseFloat((dep.amount * 1.05).toFixed(2)); if(!isAdmin) user.balance = parseFloat((user.balance + payout).toFixed(2)); user.history.unshift({ icon: '🌾', title: "Выплата", date: new Date().toLocaleString('ru-RU', {day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit'}), amount: payout, type: 'plus' }); showPush("Вклад", `Выплата: ${payout} $`, "🌾"); user.deposits.splice(i, 1); needsUpdate = true; } } }
+            if(user.credit && user.credit.active) { if(now >= user.credit.dueTime) { showPush("Уведомление", "Срок истек. Инициация списания.", "🚨", true); for (let id in user.portfolio) { user.portfolio[id].qty = 0; user.portfolio[id].avgPrice = 0; } if(!isAdmin) user.balance = 0; user.clickTier = 0; user.clickPower = 0.10; user.clickUpgradePrice = 500; user.autoClicker = 0; user.autoUpgradePrice = 5000; user.skin = 'default'; user.deposits = []; user.credit = { active: false }; user.businesses = {}; user.isLocked = true; user.creditScore = 10; user.miners = 0; user.hasOffshore = false; user.history.unshift({ icon: '🚨', title: "БАНКРОТСТВО", date: new Date().toLocaleString('ru-RU'), amount: 0, type: 'minus' }); applyLockStatusVisually(); applySkin(user.skin); document.getElementById('btn-earn').innerText = `Получить 0.10 $`; if(document.getElementById('upgrades-modal').classList.contains('active')) renderUpgrades(); needsUpdate = true; } }
+            if(user.smuggling && user.smuggling.active) { if(now >= user.smuggling.endTime) { let amt = user.smuggling.amount; if(Math.random() < 0.3) { let win = amt * 3; if(!isAdmin) user.balance += win; user.history.unshift({ icon: '🚚', title: "Операция завершена", date: new Date().toLocaleString('ru-RU', {day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit'}), amount: win, type: 'plus' }); showPush("Транспорт", `Успех. Доход: ${win.toLocaleString('ru-RU')} $`, "🚚"); showSuccessEffect(); } else { user.wantedLevel = Math.min(5, (user.wantedLevel||0) + 2); let fine = Math.floor(amt * 0.5); if(!isAdmin) { if(user.balance >= fine) user.balance -= fine; else { fine = user.balance; user.balance = 0; } } user.history.unshift({ icon: '🚨', title: "Конфискация", date: new Date().toLocaleString('ru-RU', {day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit'}), amount: -fine, type: 'minus' }); showPush("Внимание", `Груз задержан. Штраф ${fine.toLocaleString('ru-RU')} $.`, "🚨", true); } user.smuggling = { active: false }; needsUpdate = true; } }
+            if(user.wantedLevel > 0) { if(!user.nextRaidTime || user.raidScheduledLevel !== user.wantedLevel) { let maxMins = 10; if(user.wantedLevel === 1) maxMins = 10; else if(user.wantedLevel === 2 || user.wantedLevel === 3) maxMins = 7; else if(user.wantedLevel === 4) maxMins = 3; else maxMins = 1; user.nextRaidTime = Date.now() + (Math.random() * maxMins * 60 * 1000); user.raidScheduledLevel = user.wantedLevel; needsUpdate = true; } else if(Date.now() >= user.nextRaidTime) { if (user.wantedLevel <= 3 && Math.random() > 0.2) { user.nextRaidTime = Date.now() + (Math.random() * 10 * 60 * 1000); showPush("Сводка", "Проверка миновала", "ℹ️", false); } else { let raidTax = Math.floor(user.balance * 0.3); if(!isAdmin) user.balance -= raidTax; user.wantedLevel = 0; user.nextRaidTime = null; user.raidScheduledLevel = 0; addTransaction("Конфискация", -raidTax, '🚓'); showPush("Внимание", `Изъятие активов (${raidTax.toLocaleString('ru-RU')} $)`, "🚓", true); } needsUpdate = true; } } else if (user.nextRaidTime) { user.nextRaidTime = null; user.raidScheduledLevel = 0; needsUpdate = true; }
+            if(needsUpdate) { saveDB(); updateBalanceDisplayQuiet(); if(document.getElementById('screen-dashboard').classList.contains('active')) renderHistory(); if(document.getElementById('screen-useful').classList.contains('active')) { renderUsefulFull(); } } else { if(document.getElementById('screen-useful').classList.contains('active')) renderUsefulTimersOnly(); }
         } catch (e) { }
     }, 1000);
     
     setInterval(() => { try { const user = getState(); if(!user) return; if(user.energy < 100) { user.energy = Math.min(100, (user.energy || 0) + 5); saveDB(); updateBalanceDisplayQuiet(); } } catch(e){} }, 60000);
-
+    
     setInterval(() => {
         try {
-            const user = getState(); if(!user || user.isLocked) return; let needsUpdate = false;
-            const isAdmin = currentUserKey === 'danildovz1@gmail,com';
+            const user = getState(); if(!user || user.isLocked) return; let needsUpdate = false; const isAdmin = currentUserKey === 'danildovz1@gmail,com';
             if(user.balance > 100000 && !user.hasOffshore && !isAdmin) { let tax = Math.floor(user.balance * 0.01); user.balance -= tax; addTransaction("Налог", -tax, '🏛️'); showPush("Уведомление", `Списание 1% (${tax} $)`, "🏛️"); needsUpdate = true; }
             if(user.balance > 50000 && !user.hasOffshore && Math.random() < 0.1 && !isAdmin) { let raidTax = Math.floor(user.balance * 0.2); user.balance -= raidTax; addTransaction("Сбор", -raidTax, '👮'); showPush("Уведомление", `Изъятие 20% (${raidTax} $). Рекомендуется открыть офшор.`, "👮", true); needsUpdate = true; }
             if(user.miners && user.miners > 0) { let mined = parseFloat((user.miners * 0.01).toFixed(4)); let btc = user.portfolio['bite'] || {qty: 0, avgPrice: 0}; btc.qty = parseFloat((btc.qty + mined).toFixed(4)); user.portfolio['bite'] = btc; needsUpdate = true; }
@@ -1883,13 +1522,7 @@
             stocksMarket.forEach(s => updateAsset(s, false)); cryptoMarket.forEach(s => updateAsset(s, true));
             if(document.getElementById('screen-stocks').classList.contains('active')) renderStocks();
             
-            if(document.getElementById('stock-modal').classList.contains('active') && currentStockId) {
-                const stock = [...stocksMarket, ...cryptoMarket].find(s => s.id === currentStockId);
-                document.getElementById('modal-stock-price').innerText = stock.hist1H[stock.hist1H.length-1].toFixed(2) + ' $';
-                const portfolioData = user.portfolio[currentStockId] || {qty: 0, avgPrice: 0};
-                drawChart(stock['hist' + currentChartTab], portfolioData.avgPrice, portfolioData.qty > 0);
-                window.updateStockCalc();
-            }
+            if(document.getElementById('stock-modal').classList.contains('active') && currentStockId) { const stock = [...stocksMarket, ...cryptoMarket].find(s => s.id === currentStockId); document.getElementById('modal-stock-price').innerText = stock.hist1H[stock.hist1H.length-1].toFixed(2) + ' $'; const portfolioData = user.portfolio[currentStockId] || {qty: 0, avgPrice: 0}; drawChart(stock['hist' + currentChartTab], portfolioData.avgPrice, portfolioData.qty > 0); window.updateStockCalc(); }
         } catch (e) {}
     }, 5000);
 
@@ -1901,56 +1534,53 @@
 
     window.openHistoryMenu = function(index) {
         const user = getState(); if(!user || !user.history || !user.history[index]) return;
-        const item = user.history[index];
-        activeHistoryIndex = index;
-        const actionsDiv = document.getElementById('history-menu-actions');
-        let html = '';
-        
-        // Кнопка для повтора / ответа, если есть номер карты
-        if (item.cardNum) { 
-            html += `<button class="btn-main btn-primary" onclick="prepareReplyTransfer()">Повторить / Ответить</button>`; 
-        }
+        const item = user.history[index]; activeHistoryIndex = index;
+        const actionsDiv = document.getElementById('history-menu-actions'); let html = '';
+        if (item.cardNum) { html += `<button class="btn-main btn-primary" onclick="prepareReplyTransfer()">Повторить / Ответить</button>`; }
         html += `<button class="btn-main btn-danger" style="background:transparent;" onclick="deleteHistoryItem(${index})">Удалить</button>`;
-        
-        actionsDiv.innerHTML = html;
-        document.getElementById('history-menu-modal').classList.add('active');
+        actionsDiv.innerHTML = html; document.getElementById('history-menu-modal').classList.add('active');
     };
 
     window.deleteHistoryItem = function(index) { const user = getState(); user.history.splice(index, 1); saveDB(); renderHistory(); document.getElementById('history-menu-modal').classList.remove('active'); showToast("Удалено", "success"); };
     
     window.prepareReplyTransfer = function() { 
-        document.getElementById('history-menu-modal').classList.remove('active'); 
-        const user = getState();
+        document.getElementById('history-menu-modal').classList.remove('active'); const user = getState();
         if(activeHistoryIndex !== null && user.history[activeHistoryIndex] && user.history[activeHistoryIndex].cardNum) {
-            const card = user.history[activeHistoryIndex].cardNum;
-            const formatted = card.replace(/\D/g, '').replace(/(.{4})/g, '$1 ').trim();
-            document.getElementById('transfer-card').value = formatted;
-            openTransfer();
-            checkTransferForm();
-        } else {
-            showToast("Нет данных карты для повтора", "error");
-        }
+            const card = user.history[activeHistoryIndex].cardNum; const formatted = card.replace(/\D/g, '').replace(/(.{4})/g, '$1 ').trim();
+            document.getElementById('transfer-card').value = formatted; openTransfer(); checkTransferForm();
+        } else { showToast("Нет данных карты для повтора", "error"); }
     };
 
     window.openTransfer = function() { if(getState().isLocked) { showToast("Разблокируйте карту", "error"); return; } switchTab('screen-payments', document.querySelectorAll('.nav-item')[1]); }
-    window.formatCard = function(input) { input.value = input.value.replace(/\D/g, '').replace(/(.{4})/g, '$1 ').trim(); checkTransferForm(); }
+    
+    // ИСПРАВЛЕНИЕ ФОРМАТИРОВАНИЯ ДЛЯ БАГА С 16 ЦИФРАМИ
+    window.formatCard = function(input) { 
+        let val = input.value.replace(/\D/g, '').substring(0, 16); 
+        input.value = val !== '' ? val.match(/.{1,4}/g).join(' ') : ''; 
+        checkTransferForm(); 
+    }
     
     window.checkTransferForm = function() { 
         const card = document.getElementById('transfer-card').value; 
         const amount = parseFloat(document.getElementById('transfer-amount').value) || 0; 
+        const pin = document.getElementById('transfer-pin').value;
         const isAdmin = currentUserKey === 'danildovz1@gmail,com';
         const total = amount * 1.03; // Комиссия 3%
         
         document.getElementById('transfer-fee-display').innerText = amount ? `К списанию: ${total.toFixed(2)} $` : 'К списанию: 0.00 $';
-        document.getElementById('btn-transfer').disabled = !(card.length === 19 && amount > 0 && (isAdmin || total <= getState().balance) && !getState().isLocked); 
+        document.getElementById('btn-transfer').disabled = !(card.length === 19 && amount > 0 && (isAdmin || total <= getState().balance) && pin.length === 4 && !getState().isLocked); 
     }
     
     window.executeTransfer = function() { 
         const sender = getState(); const cardInput = document.getElementById('transfer-card').value.replace(/\s/g, ''); const amount = parseFloat(document.getElementById('transfer-amount').value); const btn = document.getElementById('btn-transfer');
+        const pinInput = document.getElementById('transfer-pin').value;
         const isAdmin = currentUserKey === 'danildovz1@gmail,com';
-        const total = amount * 1.03; // Сумма с комиссией 3%
+        const total = amount * 1.03;
         
+        // ПРОВЕРКА PIN КОДА КАРТЫ
+        if(pinInput !== sender.pin) { showToast("Неверный PIN-код карты", "error"); return; }
         if(cardInput === sender.cardNumber) { showToast("Ошибка реквизитов", "error"); return; } 
+        
         btn.innerText = "Обработка..."; btn.disabled = true;
         database.ref('users').orderByChild('cardNumber').equalTo(cardInput).once('value').then(snapshot => {
             if(snapshot.exists()) {
@@ -1958,12 +1588,12 @@
                 database.ref('users/' + receiverKey + '/incoming_transfers').push({ amount: amount, senderName: sender.name, senderCard: sender.cardNumber, date: new Date().toLocaleString('ru-RU', {day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit'}) }).then(() => { 
                     if (!isAdmin) sender.balance -= total; 
                     sender.history.unshift({ icon: '💸', title: `Перевод ${receiverData.name}`, date: new Date().toLocaleString('ru-RU', {day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit'}), amount: -total, type: 'minus', cardNum: receiverData.cardNumber }); saveDB(); 
-                    document.getElementById('transfer-card').value = ''; document.getElementById('transfer-amount').value = ''; btn.innerText = "Отправить средства"; btn.disabled = false; updateBalanceDisplayQuiet(); renderHistory(); switchTab('screen-dashboard', document.getElementById('nav-item-home')); showPush("Перевод доставлен", `Адресат: <b>${receiverData.name}</b>`, "💸"); 
+                    document.getElementById('transfer-card').value = ''; document.getElementById('transfer-amount').value = ''; document.getElementById('transfer-pin').value = ''; btn.innerText = "Отправить средства"; btn.disabled = false; updateBalanceDisplayQuiet(); renderHistory(); switchTab('screen-dashboard', document.getElementById('nav-item-home')); showPush("Перевод доставлен", `Адресат: <b>${receiverData.name}</b>`, "💸"); 
                 }).catch(() => { showToast("Ошибка сети", "error"); btn.innerText = "Отправить средства"; btn.disabled = false; });
             } else { 
                 if (!isAdmin) sender.balance -= total; 
                 sender.history.unshift({ icon: '💸', title: `Перевод *${cardInput.slice(-4)}`, date: new Date().toLocaleString('ru-RU', {day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit'}), amount: -total, type: 'minus', cardNum: cardInput }); saveDB(); 
-                document.getElementById('transfer-card').value = ''; document.getElementById('transfer-amount').value = ''; btn.innerText = "Отправить средства"; btn.disabled = false; updateBalanceDisplayQuiet(); renderHistory(); switchTab('screen-dashboard', document.getElementById('nav-item-home')); showPush("Перевод выполнен", `Сумма: <b>${amount} $</b>`, "💸"); 
+                document.getElementById('transfer-card').value = ''; document.getElementById('transfer-amount').value = ''; document.getElementById('transfer-pin').value = ''; btn.innerText = "Отправить средства"; btn.disabled = false; updateBalanceDisplayQuiet(); renderHistory(); switchTab('screen-dashboard', document.getElementById('nav-item-home')); showPush("Перевод выполнен", `Сумма: <b>${amount} $</b>`, "💸"); 
             }
         }).catch(err => { showToast("Ошибка связи", "error"); btn.innerText = "Отправить средства"; btn.disabled = false; });
     }
